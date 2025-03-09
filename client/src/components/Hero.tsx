@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import RealDripDog from '../assets/RealDripDog';
 import { fadeIn, fadeInUp, staggerChildren } from '../styles/animations';
+import { useAppContext } from '../context/AppContext';
 
 const Hero: React.FC = () => {
-  const [funMode, setFunMode] = useState(false);
+  const { 
+    partyMode, 
+    togglePartyMode, 
+    price, 
+    tokenAddress, 
+    copyToClipboard 
+  } = useAppContext();
+  
   const controls = useAnimation();
   const textControls = useAnimation();
   
   useEffect(() => {
-    if (funMode) {
+    if (partyMode) {
       // Trigger chaotic animations
       controls.start({
         x: [0, -20, 15, -10, 0],
@@ -25,7 +33,7 @@ const Hero: React.FC = () => {
       controls.start({ x: 0, y: 0 });
       textControls.start({ scale: 1, rotate: 0 });
     }
-  }, [funMode, controls, textControls]);
+  }, [partyMode, controls, textControls]);
 
   const handleScrollToBot = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,17 +42,15 @@ const Hero: React.FC = () => {
       botSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-  
-  const toggleFunMode = () => {
-    setFunMode(!funMode);
-  };
 
   const dogPhrases = [
     "Much wow!",
     "Such gains!",
     "Very moon!",
     "Woof woof!",
-    "So drippy!"
+    "So drippy!",
+    "Buy the dip!",
+    "To the moon!"
   ];
   
   const randomPhrase = () => {
@@ -59,7 +65,7 @@ const Hero: React.FC = () => {
           className="absolute -top-16 -right-16 w-64 h-64 bg-yellow-400 opacity-20 rounded-full filter blur-3xl"
           animate={{ 
             rotate: 360,
-            scale: funMode ? [1, 1.2, 0.9, 1.3, 1] : 1
+            scale: partyMode ? [1, 1.2, 0.9, 1.3, 1] : 1
           }}
           transition={{ 
             rotate: { duration: 20, repeat: Infinity, ease: "linear" },
@@ -70,7 +76,7 @@ const Hero: React.FC = () => {
           className="absolute top-1/4 -left-24 w-80 h-80 bg-orange-500 opacity-20 rounded-full filter blur-3xl"
           animate={{ 
             rotate: 360,
-            scale: funMode ? [1, 0.8, 1.1, 0.9, 1] : 1
+            scale: partyMode ? [1, 0.8, 1.1, 0.9, 1] : 1
           }}
           transition={{ 
             rotate: { duration: 25, repeat: Infinity, ease: "linear" },
@@ -81,8 +87,8 @@ const Hero: React.FC = () => {
           className="absolute bottom-1/4 right-10 w-72 h-72 bg-orange-300 opacity-15 rounded-full filter blur-3xl"
           animate={{ 
             rotate: 360,
-            x: funMode ? [0, 50, -30, 20, 0] : 0,
-            y: funMode ? [0, -30, 20, -10, 0] : 0
+            x: partyMode ? [0, 50, -30, 20, 0] : 0,
+            y: partyMode ? [0, -30, 20, -10, 0] : 0
           }}
           transition={{ 
             rotate: { duration: 30, repeat: Infinity, ease: "linear" },
@@ -121,7 +127,7 @@ const Hero: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-6">
               <motion.a
-                href="https://jup.ag/"
+                href={`https://jup.ag/swap/SOL-${tokenAddress}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-yellow-400 text-black px-10 py-4 rounded-full text-lg font-bold hover:bg-opacity-80 transition shadow-[0_0_15px_rgba(250,204,21,0.7)] hover:shadow-[0_0_25px_rgba(250,204,21,0.9)] hover:-translate-y-0.5 w-full sm:w-auto text-center"
@@ -141,15 +147,15 @@ const Hero: React.FC = () => {
               </motion.a>
             </div>
 
-            {/* Fun Mode Toggle */}
+            {/* Party Mode Toggle */}
             <motion.button
               className="mt-6 px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-400 text-black rounded-full font-bold text-sm flex items-center justify-center mx-auto lg:mx-0"
-              onClick={toggleFunMode}
+              onClick={togglePartyMode}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="mr-2">{funMode ? "Chill Mode" : "Party Mode"}</span>
-              <i className={`fas ${funMode ? "fa-moon" : "fa-sun"}`}></i>
+              <span className="mr-2">{partyMode ? "Chill Mode" : "Party Mode"}</span>
+              <i className={`fas ${partyMode ? "fa-moon" : "fa-sun"}`}></i>
             </motion.button>
             
             {/* Token Stats - stylized and playful */}
@@ -168,7 +174,7 @@ const Hero: React.FC = () => {
                   <i className="fas fa-chart-line text-yellow-400 mr-2"></i>
                   <p className="text-gray-400 text-sm">Market Cap</p>
                 </div>
-                <p className="font-['Archivo_Black'] text-2xl text-white">$4.2M</p>
+                <p className="font-['Archivo_Black'] text-2xl text-white">{price.marketCap}</p>
               </motion.div>
               
               <motion.div 
@@ -180,7 +186,7 @@ const Hero: React.FC = () => {
                   <i className="fas fa-users text-yellow-400 mr-2"></i>
                   <p className="text-gray-400 text-sm">Holders</p>
                 </div>
-                <p className="font-['Archivo_Black'] text-2xl text-white">12,420</p>
+                <p className="font-['Archivo_Black'] text-2xl text-white">{price.holders}</p>
               </motion.div>
               
               <motion.div 
@@ -197,8 +203,30 @@ const Hero: React.FC = () => {
                   <i className="fas fa-rocket text-green-400 mr-2"></i>
                   <p className="text-gray-400 text-sm">24h Change</p>
                 </div>
-                <p className="font-['Archivo_Black'] text-2xl text-green-400">+69.4%</p>
+                <p className="font-['Archivo_Black'] text-2xl text-green-400">{price.change}</p>
               </motion.div>
+            </motion.div>
+            
+            {/* Token Address */}
+            <motion.div
+              className="mt-8 p-4 bg-black bg-opacity-50 backdrop-blur-xl rounded-xl border border-yellow-400 border-opacity-20 transform hover:scale-105 transition-transform"
+              whileHover={{ y: -5 }}
+              onClick={() => copyToClipboard(tokenAddress)}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-white font-bold">Token Address:</p>
+                <motion.button
+                  className="text-yellow-400 hover:text-yellow-300"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <i className="fas fa-copy"></i>
+                </motion.button>
+              </div>
+              <p className="text-gray-300 font-mono text-xs break-all cursor-pointer"
+                 onClick={() => copyToClipboard(tokenAddress)}>
+                {tokenAddress}
+              </p>
             </motion.div>
           </motion.div>
           
@@ -235,7 +263,7 @@ const Hero: React.FC = () => {
                 className="absolute top-10 -left-6 w-16 h-16 flex items-center justify-center"
                 animate={{ 
                   y: [0, -15, 0],
-                  rotate: funMode ? [0, 360] : [0, 0]
+                  rotate: partyMode ? [0, 360] : [0, 0]
                 }}
                 transition={{ 
                   y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
@@ -249,8 +277,8 @@ const Hero: React.FC = () => {
                 className="absolute bottom-10 right-0 w-16 h-16 flex items-center justify-center"
                 animate={{ 
                   y: [0, 15, 0],
-                  x: funMode ? [0, 20, 0, -20, 0] : [0, 0],
-                  rotate: funMode ? [0, -360] : [0, 0]
+                  x: partyMode ? [0, 20, 0, -20, 0] : [0, 0],
+                  rotate: partyMode ? [0, -360] : [0, 0]
                 }}
                 transition={{ 
                   y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
@@ -265,7 +293,7 @@ const Hero: React.FC = () => {
                 className="absolute top-1/3 -right-10 w-16 h-16 flex items-center justify-center"
                 animate={{ 
                   scale: [1, 1.2, 1],
-                  rotate: funMode ? [0, 360] : [0, 0]
+                  rotate: partyMode ? [0, 360] : [0, 0]
                 }}
                 transition={{ 
                   scale: { duration: 2, repeat: Infinity },

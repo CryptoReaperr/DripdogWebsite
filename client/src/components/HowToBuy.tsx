@@ -4,7 +4,7 @@ import { fadeIn, fadeInUp, staggerChildren } from '../styles/animations';
 import { useAppContext } from '../context/AppContext';
 
 const HowToBuy: React.FC = () => {
-  const { tokenAddress, copyToClipboard, copySuccess } = useAppContext();
+  const { tokenAddress, copyToClipboard, copySuccess, partyMode } = useAppContext();
 
   const steps = [
     {
@@ -33,23 +33,64 @@ const HowToBuy: React.FC = () => {
       description: 'Connect your wallet to a Solana DEX and swap SOL for $DRIP.',
       links: [
         { name: 'Raydium', url: 'https://raydium.io/swap/', icon: 'fas fa-random', color: 'bg-[#3AEAFF] bg-opacity-30' },
-        { name: 'Jupiter', url: 'https://jup.ag/', icon: 'fas fa-random', color: 'bg-[#FF7A45] bg-opacity-30' },
-        { name: 'Orca', url: 'https://www.orca.so/', icon: 'fas fa-random', color: 'bg-[#7C44F6] bg-opacity-30' },
+        { name: 'Jupiter', url: `https://jup.ag/swap/SOL-${tokenAddress}`, icon: 'fas fa-random', color: 'bg-[#FF7A45] bg-opacity-30' },
+        { name: 'Pump.fun', url: `https://pump.fun/token/${tokenAddress}`, icon: 'fas fa-rocket', color: 'bg-[#FF4500] bg-opacity-30' },
       ]
     },
     {
       number: 4,
-      title: 'Swap for $DRIP',
-      description: 'Enter the $DRIP token address, set your slippage to 1%, and confirm the swap.',
+      title: 'HODL to the Moon',
+      description: 'Enter the $DRIP token address, set your slippage to 1%, and confirm the swap. Then share memes and join the community.',
       tokenAddress: true,
     },
   ];
 
+  // Generate random emojis for party mode
+  const partyEmojis = ['🚀', '💎', '🌕', '🔥', '💰', '🐶', '💧'];
+  const getRandomEmoji = () => partyEmojis[Math.floor(Math.random() * partyEmojis.length)];
+
   return (
     <section id="buy" className="py-20 relative bg-black">
       <div className="absolute inset-0 opacity-5">
-        <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2064&auto=format&fit=crop')] bg-cover bg-center"></div>
+        <div className="w-full h-full bg-gradient-to-b from-black to-yellow-900 bg-cover bg-center"></div>
       </div>
+      
+      {/* Party mode floating elements */}
+      {partyMode && (
+        <>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute text-3xl pointer-events-none z-10"
+              initial={{ 
+                x: Math.random() * 100, 
+                y: Math.random() * 100,
+                opacity: 0
+              }}
+              animate={{ 
+                x: [
+                  Math.random() * window.innerWidth, 
+                  Math.random() * window.innerWidth, 
+                  Math.random() * window.innerWidth
+                ],
+                y: [
+                  Math.random() * window.innerHeight, 
+                  Math.random() * window.innerHeight, 
+                  Math.random() * window.innerHeight
+                ],
+                opacity: [0, 1, 0]
+              }}
+              transition={{ 
+                repeat: Infinity, 
+                duration: 15 + Math.random() * 10,
+                delay: Math.random() * 5
+              }}
+            >
+              {getRandomEmoji()}
+            </motion.div>
+          ))}
+        </>
+      )}
       
       <div className="container mx-auto px-6 relative z-10">
         <motion.div 
@@ -60,10 +101,10 @@ const HowToBuy: React.FC = () => {
           variants={fadeInUp}
         >
           <h2 className="text-4xl md:text-5xl font-['Archivo_Black'] text-white mb-4">
-            How to <span className="bg-gradient-to-r from-orange-500 to-purple-600 text-transparent bg-clip-text">Buy $DRIP</span>
+            How to <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">Buy $DRIP</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto font-['Inter']">
-            Follow these simple steps to join the DripDog family and secure your bag.
+            Follow these simple steps to join the DripDog fam and secure your bag of fluffiness.
           </p>
         </motion.div>
         
@@ -82,46 +123,91 @@ const HowToBuy: React.FC = () => {
               >
                 <div className="md:w-1/3 mb-6 md:mb-0">
                   <motion.div 
-                    className="bg-black bg-opacity-70 backdrop-blur-xl w-24 h-24 rounded-full flex items-center justify-center mx-auto border border-white border-opacity-10"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="bg-black bg-opacity-70 backdrop-blur-xl w-24 h-24 rounded-full flex items-center justify-center mx-auto border border-yellow-400 border-opacity-30"
+                    whileHover={{ scale: 1.1, rotate: partyMode ? [0, 10, -10, 0] : 5 }}
+                    transition={{
+                      rotate: partyMode ? { repeat: Infinity, duration: 0.5 } : {}
+                    }}
                   >
-                    <span className="text-5xl font-['Archivo_Black'] text-orange-500">{step.number}</span>
+                    <span className="text-5xl font-['Archivo_Black'] text-yellow-400">{step.number}</span>
                   </motion.div>
                 </div>
-                <div className="md:w-2/3 bg-black bg-opacity-70 backdrop-blur-xl rounded-2xl p-6 border border-white border-opacity-10">
-                  <h3 className="text-2xl font-['Archivo_Black'] text-white mb-3">{step.title}</h3>
+                <div className="md:w-2/3 bg-black bg-opacity-70 backdrop-blur-xl rounded-2xl p-6 border border-yellow-400 border-opacity-20 shadow-lg">
+                  <h3 className="text-2xl font-['Archivo_Black'] text-white mb-3 flex items-center">
+                    {step.title} 
+                    {partyMode && <motion.span 
+                      className="ml-2"
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    >
+                      {step.number === 4 ? '🌕' : '✨'}
+                    </motion.span>}
+                  </h3>
                   <p className="text-gray-300 mb-4 font-['Inter']">{step.description}</p>
                   
                   {step.links && (
                     <div className="flex flex-wrap gap-4">
                       {step.links.map((link, index) => (
-                        <a 
+                        <motion.a 
                           key={index}
                           href={link.url} 
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`${link.color} px-4 py-2 rounded-lg text-white flex items-center hover:bg-opacity-50 transition`}
+                          whileHover={{ 
+                            scale: 1.05, 
+                            y: partyMode ? [-2, 2, -2] : -2 
+                          }}
+                          transition={{
+                            y: partyMode ? { repeat: Infinity, duration: 0.3 } : {}
+                          }}
                         >
                           <i className={`${link.icon} mr-2`}></i> {link.name}
-                        </a>
+                        </motion.a>
                       ))}
                     </div>
                   )}
                   
                   {step.tokenAddress && (
                     <>
-                      <div className="bg-black p-4 rounded-lg border border-orange-500 border-dashed mb-4">
-                        <p className="font-mono text-sm text-white break-all select-all">{tokenAddress}</p>
-                      </div>
+                      <motion.div 
+                        className="bg-black p-4 rounded-lg border border-yellow-400 border-opacity-30 mb-4"
+                        whileHover={{ 
+                          boxShadow: "0 0 15px rgba(253, 224, 71, 0.3)",
+                          borderColor: "rgba(253, 224, 71, 0.7)"
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-white font-bold">$DRIP Token Address:</p>
+                          <motion.span 
+                            className="text-yellow-400"
+                            animate={partyMode ? { scale: [1, 1.2, 1] } : {}}
+                            transition={{ repeat: Infinity, duration: 1.5 }}
+                          >
+                            (tap to copy)
+                          </motion.span>
+                        </div>
+                        <p 
+                          className="font-mono text-sm text-white break-all select-all cursor-pointer"
+                          onClick={() => copyToClipboard(tokenAddress)}
+                        >
+                          {tokenAddress}
+                        </p>
+                      </motion.div>
                       <div className="flex justify-center">
                         <motion.button 
-                          className="bg-orange-500 text-white px-8 py-3 rounded-full font-bold hover:bg-opacity-80 transition shadow-[0_0_15px_rgba(255,126,0,0.7)]"
+                          className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-8 py-3 rounded-full font-bold hover:bg-opacity-80 transition shadow-[0_0_15px_rgba(253,224,71,0.4)]"
                           onClick={() => copyToClipboard(tokenAddress)}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
+                          animate={partyMode ? {
+                            y: [0, -5, 0],
+                            boxShadow: ['0 0 15px rgba(253,224,71,0.4)', '0 0 25px rgba(253,224,71,0.7)', '0 0 15px rgba(253,224,71,0.4)']
+                          } : {}}
+                          transition={partyMode ? { repeat: Infinity, duration: 2 } : {}}
                         >
                           <i className={`${copySuccess ? 'fas fa-check' : 'fas fa-copy'} mr-2`}></i> 
-                          {copySuccess ? 'Copied!' : 'Copy Token Address'}
+                          {copySuccess ? 'Copied to Clipboard!' : 'Copy Token Address'}
                         </motion.button>
                       </div>
                     </>
@@ -140,14 +226,30 @@ const HowToBuy: React.FC = () => {
             transition={{ delay: 0.5 }}
           >
             <motion.a 
-              href="https://jup.ag/" 
+              href={`https://jup.ag/swap/SOL-${tokenAddress}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-orange-500 text-white px-10 py-4 rounded-full text-lg font-bold hover:bg-opacity-80 transition shadow-[0_0_15px_rgba(255,126,0,0.7)] hover:shadow-[0_0_25px_rgba(255,126,0,0.9)]"
+              className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-10 py-4 rounded-full text-lg font-bold hover:bg-opacity-80 transition shadow-[0_0_15px_rgba(253,224,71,0.7)] hover:shadow-[0_0_25px_rgba(253,224,71,0.9)]"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={partyMode ? {
+                rotate: [-1, 1, -1],
+                scale: [1, 1.02, 1]
+              } : {}}
+              transition={partyMode ? { repeat: Infinity, duration: 1.5 } : {}}
+            >
+              <i className="fas fa-bolt mr-2"></i> Quick Buy on Jupiter
+            </motion.a>
+            
+            <motion.a 
+              href={`https://solscan.io/token/${tokenAddress}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-black bg-opacity-70 backdrop-blur-xl text-white px-10 py-4 rounded-full text-lg font-bold hover:bg-white hover:bg-opacity-10 transition border border-yellow-400 border-opacity-20 mt-4 ml-4"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <i className="fas fa-bolt mr-2"></i> Quick Buy on Jupiter
+              <i className="fas fa-search mr-2"></i> View on Solscan
             </motion.a>
           </motion.div>
         </div>
