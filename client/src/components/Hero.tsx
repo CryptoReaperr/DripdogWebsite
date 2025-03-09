@@ -45,12 +45,20 @@ const Hero: React.FC = () => {
     { text: "Copy my address! I won't bite!", emoji: "📋" }
   ];
   
-  // Change quotes periodically
+  // Change quotes periodically with longer interval (20 seconds)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentQuote(prev => (prev + 1) % dogQuotes.length);
-    }, 4000);
-    return () => clearInterval(interval);
+    // Add initial delay before starting to cycle quotes
+    const initialDelay = setTimeout(() => {
+      const interval = setInterval(() => {
+        setCurrentQuote(prev => (prev + 1) % dogQuotes.length);
+      }, 20000);
+      
+      // Clean up interval when component unmounts
+      return () => clearInterval(interval);
+    }, 20000);
+    
+    // Clean up timeout when component unmounts
+    return () => clearTimeout(initialDelay);
   }, []);
   
   // Custom copy to clipboard with visual feedback
