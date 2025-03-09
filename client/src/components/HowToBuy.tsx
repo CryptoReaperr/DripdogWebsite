@@ -1,30 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '../context/AppContext';
 
 const HowToBuy: React.FC = () => {
   const { tokenAddress, copyToClipboard, copySuccess, partyMode } = useAppContext();
-  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
-  // Simplify to just 3 steps with fun, engaging content
+  // Super simple steps with humor
   const steps = [
     {
       emoji: "👛",
-      title: "Get SOL Ready",
-      description: "Install Phantom wallet & load it with some SOL. It's like getting dog treats ready!",
-      link: { name: "Phantom", url: "https://phantom.app/", icon: "fas fa-ghost" }
+      title: "Get a Wallet",
+      description: "Download Phantom wallet, add some SOL. No wallet, no $DRIP. Simple math.",
+      link: { name: "Get Phantom", url: "https://phantom.app/", icon: "fas fa-ghost" }
     },
     {
       emoji: "🔄",
-      title: "Swap for $DRIP", 
-      description: "Go to Jupiter, paste our address, swap SOL for $DRIP. As simple as teaching a dog to sit!",
-      link: { name: "Jupiter", url: `https://jup.ag/swap/SOL-${tokenAddress}`, icon: "fas fa-random" }
+      title: "Buy $DRIP", 
+      description: "Copy our token address, head to Jupiter, swap SOL for $DRIP. Click. Approve. Done.",
+      link: { name: "Buy on Jupiter", url: `https://jup.ag/swap/SOL-${tokenAddress}`, icon: "fas fa-exchange-alt" }
     },
     {
-      emoji: "🚀",
-      title: "HODL & Join",
-      description: "Hold your $DRIP and join our Telegram. We don't bite, we just go to the moon!",
-      link: { name: "Telegram", url: "https://t.me/NBT_portal", icon: "fab fa-telegram-plane" }
+      emoji: "💬",
+      title: "Join Us",
+      description: "Enter our Telegram portal. We're like a family, but you can actually choose to join.",
+      link: { name: "Telegram Portal", url: "https://t.me/NBT_portal", icon: "fab fa-telegram-plane" }
     }
   ];
 
@@ -33,10 +32,10 @@ const HowToBuy: React.FC = () => {
     copyToClipboard(tokenAddress);
     
     if (partyMode) {
-      // Create confetti effect when copying in party mode
-      for (let i = 0; i < 20; i++) {
+      // Create a simpler confetti effect
+      for (let i = 0; i < 10; i++) {
         const confetti = document.createElement('div');
-        confetti.innerText = ['🎉', '💧', '🐕', '💰', '✨'][Math.floor(Math.random() * 5)];
+        confetti.innerText = ['💧', '🐕'][Math.floor(Math.random() * 2)];
         confetti.style.position = 'fixed';
         confetti.style.left = `${Math.random() * 100}vw`;
         confetti.style.top = `${Math.random() * 100}vh`;
@@ -45,64 +44,54 @@ const HowToBuy: React.FC = () => {
         confetti.style.pointerEvents = 'none';
         document.body.appendChild(confetti);
         
-        // Animation
+        // Simple animation
         confetti.animate([
-          { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
-          { transform: `translate(${Math.random() * 200 - 100}px, ${Math.random() * 200}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+          { transform: 'translate(0, 0)', opacity: 1 },
+          { transform: `translate(0, ${Math.random() * 100 + 50}px)`, opacity: 0 }
         ], {
-          duration: 2000,
-          easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+          duration: 1500,
+          easing: 'ease-out'
         });
         
         // Remove after animation
         setTimeout(() => {
           document.body.removeChild(confetti);
-        }, 2000);
+        }, 1500);
       }
     }
   };
 
   return (
-    <section id="buy" className="py-20 relative">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
-          className="absolute top-0 right-0 w-full h-full bg-black opacity-90"
-          animate={{ opacity: 0.9 }}
-        />
-      </div>
-      
-      <div className="container mx-auto px-6 relative z-10">
+    <section id="buy" className="py-16 relative bg-gradient-to-b from-black to-gray-900">
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div 
           className="text-center mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            How to <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">Grab Some $DRIP</span>
+          <h2 className="text-4xl font-bold text-white mb-3">
+            Get Your <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">$DRIP</span>
           </h2>
           
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Three simple steps to join the pack! So easy even your grandma could do it (if she's cool).
+          <p className="text-lg text-gray-300 max-w-xl mx-auto">
+            So easy a cat person could do it (and that's saying something).
           </p>
         </motion.div>
         
-        {/* Token Card - Most Important Part */}
+        {/* Token Address - The Most Important Part */}
         <motion.div
-          className="max-w-md mx-auto mb-12 bg-black bg-opacity-60 backdrop-blur-sm p-5 rounded-2xl border border-yellow-400 border-opacity-30 shadow-[0_0_15px_rgba(250,204,21,0.15)]"
+          className="max-w-sm mx-auto mb-10 bg-black bg-opacity-70 p-4 rounded-xl border border-yellow-400 border-opacity-30"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          whileHover={{ 
-            boxShadow: "0 0 25px rgba(253, 224, 71, 0.3)",
-            scale: 1.02
-          }}
+          whileHover={{ scale: 1.02 }}
+          onClick={handleCopyToken}
         >
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-2">
             <div className="flex items-center">
-              <span className="text-2xl mr-2">🔗</span>
-              <h3 className="text-xl text-white font-bold">$DRIP Token Address</h3>
+              <span className="text-xl mr-2">📋</span>
+              <h3 className="text-white font-bold">Token Address</h3>
             </div>
             
             <AnimatePresence>
@@ -111,175 +100,105 @@ const HowToBuy: React.FC = () => {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="bg-green-500 bg-opacity-20 text-green-400 text-sm px-3 py-1 rounded-full"
+                  className="text-green-400 text-sm bg-black bg-opacity-70 px-2 py-1 rounded-full"
                 >
-                  <i className="fas fa-check mr-1"></i> Copied!
+                  Copied! ✓
                 </motion.div>
               ) : (
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="text-yellow-400 hover:text-yellow-300 bg-black bg-opacity-50 px-3 py-1 rounded-full text-sm"
-                  onClick={handleCopyToken}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="text-yellow-400 text-sm"
                 >
-                  <i className="fas fa-copy mr-1"></i> Copy
+                  <i className="fas fa-copy"></i> Copy
                 </motion.button>
               )}
             </AnimatePresence>
           </div>
           
-          <div 
-            className="bg-black bg-opacity-60 p-3 rounded-lg border border-yellow-400 border-opacity-20 cursor-pointer font-mono text-xs break-all text-gray-300"
-            onClick={handleCopyToken}
-          >
+          <p className="text-gray-300 font-mono text-xs break-all bg-black bg-opacity-60 p-2 rounded-lg cursor-pointer">
             {tokenAddress}
-          </div>
-          
-          <div className="mt-4 flex justify-around">
-            <motion.a
-              href={`https://jup.ag/swap/SOL-${tokenAddress}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center text-yellow-400 hover:text-yellow-300 text-sm"
-              whileHover={{ scale: 1.05, y: -2 }}
-            >
-              <i className="fas fa-exchange-alt mr-1"></i> Jupiter
-            </motion.a>
-            
-            <motion.a
-              href={`https://pump.fun/token/${tokenAddress}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center text-yellow-400 hover:text-yellow-300 text-sm"
-              whileHover={{ scale: 1.05, y: -2 }}
-            >
-              <i className="fas fa-rocket mr-1"></i> Pump.fun
-            </motion.a>
-            
-            <motion.a
-              href={`https://solscan.io/token/${tokenAddress}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center text-yellow-400 hover:text-yellow-300 text-sm"
-              whileHover={{ scale: 1.05, y: -2 }}
-            >
-              <i className="fas fa-search mr-1"></i> Solscan
-            </motion.a>
-          </div>
+          </p>
         </motion.div>
         
-        {/* Steps Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {steps.map((step, index) => (
-            <motion.div
-              key={index}
-              className="bg-black bg-opacity-60 backdrop-blur-sm rounded-2xl overflow-hidden border border-yellow-400 border-opacity-20"
-              whileHover={{ 
-                y: -5, 
-                boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
-                borderColor: "rgba(253, 224, 71, 0.5)" 
-              }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-              onHoverStart={() => setHoveredStep(index)}
-              onHoverEnd={() => setHoveredStep(null)}
-            >
-              <div className="p-6">
-                <div className="flex items-center mb-4">
-                  <motion.div 
-                    className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg"
-                    animate={partyMode ? { 
-                      rotate: [0, 10, -10, 0],
-                      scale: [1, 1.1, 0.9, 1] 
-                    } : {}}
-                    transition={partyMode ? { repeat: Infinity, duration: 3 } : {}}
-                  >
-                    {step.emoji}
-                  </motion.div>
-                  <div className="ml-4">
-                    <h3 className="text-xl font-bold text-white">{step.title}</h3>
-                    <div className="h-1 w-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
-                  </div>
-                </div>
-                
-                <p className="text-gray-300 mb-4 min-h-[80px]">{step.description}</p>
-                
-                <motion.a
-                  href={step.link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center bg-black bg-opacity-50 hover:bg-opacity-70 text-yellow-400 px-4 py-2 rounded-full text-sm font-bold transition"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <i className={`${step.link.icon} mr-2`}></i>
-                  {step.link.name}
-                </motion.a>
-              </div>
-              
-              {/* Floating particles on hover */}
-              <AnimatePresence>
-                {hoveredStep === index && partyMode && (
-                  <>
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute text-lg pointer-events-none"
-                        initial={{ 
-                          x: 50 + Math.random() * 100, 
-                          y: 50 + Math.random() * 100,
-                          opacity: 0
-                        }}
-                        animate={{ 
-                          x: 20 + Math.random() * 150, 
-                          y: Math.random() * 100,
-                          opacity: [0, 1, 0],
-                          rotate: [0, 360]
-                        }}
-                        exit={{ opacity: 0 }}
-                        transition={{ 
-                          duration: 1.5 + Math.random(),
-                          ease: "easeInOut" 
-                        }}
-                      >
-                        {step.emoji}
-                      </motion.div>
-                    ))}
-                  </>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
-        
-        {/* CTA Button */}
-        <motion.div
-          className="text-center mt-12"
+        {/* Quick Links */}
+        <motion.div 
+          className="flex flex-wrap justify-center gap-3 mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
           <motion.a
             href={`https://jup.ag/swap/SOL-${tokenAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-10 py-4 rounded-full text-lg font-bold shadow-[0_0_15px_rgba(250,204,21,0.4)]"
-            whileHover={{ scale: 1.05, y: -3 }}
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-2 rounded-full font-bold shadow-lg"
+            whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            animate={partyMode ? {
-              y: [0, -5, 0],
-              boxShadow: ['0 0 15px rgba(250,204,21,0.4)', '0 0 25px rgba(250,204,21,0.7)', '0 0 15px rgba(250,204,21,0.4)']
-            } : {}}
-            transition={partyMode ? { repeat: Infinity, duration: 2 } : {}}
           >
-            <i className="fas fa-bolt mr-2"></i> Buy $DRIP Now
+            <i className="fas fa-exchange-alt mr-2"></i> Buy on Jupiter
           </motion.a>
-          
-          <p className="text-gray-400 mt-4 italic max-w-lg mx-auto text-sm">
-            "I bought $DRIP and now I'm so rich, my dog has a dog." - Some Random Internet Guy, Probably
-          </p>
+          <motion.a
+            href="https://t.me/NBT_portal"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-black border border-yellow-400 border-opacity-40 text-white px-6 py-2 rounded-full font-bold"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <i className="fab fa-telegram-plane mr-2"></i> Join Telegram
+          </motion.a>
         </motion.div>
+        
+        {/* Steps */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+          {steps.map((step, index) => (
+            <motion.div
+              key={index}
+              className="bg-black bg-opacity-60 rounded-lg p-5 border border-yellow-400 border-opacity-20"
+              whileHover={{ 
+                y: -5, 
+                boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+            >
+              <motion.div 
+                className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl mb-3"
+                animate={partyMode ? { rotate: [0, 10, -10, 0] } : {}}
+                transition={partyMode ? { repeat: Infinity, duration: 3 } : {}}
+              >
+                {step.emoji}
+              </motion.div>
+              
+              <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
+              <p className="text-gray-300 text-sm mb-4">{step.description}</p>
+              
+              <motion.a
+                href={step.link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-yellow-400 text-sm font-medium"
+                whileHover={{ x: 3 }}
+              >
+                <i className={`${step.link.icon} mr-1`}></i>
+                {step.link.name} <i className="fas fa-arrow-right ml-1 text-xs"></i>
+              </motion.a>
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Fun Quote */}
+        <motion.p
+          className="text-center text-gray-400 italic max-w-md mx-auto text-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.8 }}
+          transition={{ delay: 0.6 }}
+        >
+          "The only thing I regret about buying $DRIP is not buying more."
+          <br />— Your future self, probably
+        </motion.p>
       </div>
     </section>
   );

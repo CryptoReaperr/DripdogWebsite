@@ -1,249 +1,236 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { fadeIn, fadeInLeft, fadeInRight, staggerChildren } from '../styles/animations';
 import DripDogLogo from '../assets/DripDogLogo';
 import { useAppContext } from '../context/AppContext';
 
 const TelegramBot: React.FC = () => {
   const { partyMode } = useAppContext();
   
-  const botCommands = [
-    { 
-      command: '/woof', 
-      description: 'Get a randomized dog bark',
-      emoji: '🐶',
-      color: 'bg-yellow-400 bg-opacity-20',
-      textColor: 'text-yellow-400'
+  // Fun reasons to join the Telegram
+  const portalFeatures = [
+    {
+      title: "Community Vibes",
+      description: "Join fellow DripDog holders - it's like a digital dog park but with memes",
+      emoji: "👥",
+      color: "from-yellow-400 to-yellow-500"
     },
-    { 
-      command: '/meme', 
-      description: 'Get dank DripDog memes',
-      emoji: '🤣',
-      color: 'bg-purple-600 bg-opacity-20',
-      textColor: 'text-purple-500'
+    {
+      title: "Price Alerts",
+      description: "Be the first to know when $DRIP is mooning (or barking at the moon)",
+      emoji: "📈",
+      color: "from-green-400 to-green-500"
     },
-    { 
-      command: '/price', 
-      description: 'Latest $DRIP price info',
-      emoji: '💰',
-      color: 'bg-green-500 bg-opacity-20',
-      textColor: 'text-green-500'
-    },
-    { 
-      command: '/party', 
-      description: 'Start the DripDog party',
-      emoji: '🎉',
-      color: 'bg-blue-400 bg-opacity-20',
-      textColor: 'text-blue-400'
-    },
-  ];
-
-  // Speech bubbles for chat simulation
-  const chatMessages = [
-    "What's the price looking like?",
-    "/price",
-    "$DRIP is at $0.00421 (+69.4% in 24h) 🚀",
-    "To the mooooooon! 🌕",
-    "/meme",
-    "Here's your fresh DripDog meme 🤣"
+    {
+      title: "Exclusive Content",
+      description: "Access fresh DripDog memes that'll make even your cat person friends laugh",
+      emoji: "🔥",
+      color: "from-orange-400 to-red-500"
+    }
   ];
 
   return (
-    <section id="bot" className="py-16 relative bg-black">
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black to-yellow-900"></div>
-      </div>
-      
-      <div className="container mx-auto px-6 relative z-10">
+    <section id="bot" className="py-16 relative bg-gradient-to-b from-black to-gray-900">
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div 
           className="text-center mb-10"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeInLeft}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <h2 className="text-4xl md:text-5xl font-['Archivo_Black'] text-white mb-4">
-            DripDog <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">Telegram Bot</span>
+          <h2 className="text-4xl font-bold text-white mb-4">
+            Join the <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">Telegram Portal</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Your fluffy companion in the Telegram world. Check prices, get memes, and join the pack!
+          <p className="text-lg text-gray-300 max-w-xl mx-auto">
+            Where DripDog enthusiasts gather to share memes, track prices, and unleash the power of community
           </p>
         </motion.div>
         
-        <motion.div 
-          className="flex flex-col lg:flex-row items-center gap-12"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={staggerChildren}
-        >
-          {/* Bot Chat Simulation */}
+        <div className="flex flex-col lg:flex-row items-center gap-8 max-w-5xl mx-auto">
+          {/* Telegram Preview */}
           <motion.div 
-            className="lg:w-1/2 w-full mb-12 lg:mb-0"
-            variants={fadeInLeft}
+            className="lg:w-1/2 w-full mb-8 lg:mb-0"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
             <motion.div 
-              className="bg-black bg-opacity-80 backdrop-blur-xl rounded-2xl p-6 md:p-6 border border-yellow-400 border-opacity-20 shadow-lg"
+              className="bg-black bg-opacity-70 backdrop-blur-sm rounded-2xl p-5 border border-yellow-400 border-opacity-20 shadow-lg relative overflow-hidden"
               whileHover={{ scale: 1.02 }}
-              animate={partyMode ? { 
-                y: [0, -5, 0],
-                boxShadow: ['0 0 10px rgba(253,224,71,0.2)', '0 0 20px rgba(253,224,71,0.4)', '0 0 10px rgba(253,224,71,0.2)']
-              } : {}}
-              transition={partyMode ? { repeat: Infinity, duration: 3 } : {}}
             >
-              <div className="flex items-center mb-6 border-b border-gray-800 pb-4">
-                <DripDogLogo width={50} height={50} className="rounded-full border-2 border-yellow-400" />
-                <div className="ml-4">
-                  <h3 className="text-xl font-['Archivo_Black'] text-white">@DripBot</h3>
+              {/* Portal effect - animated gradient border */}
+              <div className="absolute inset-0 p-[2px] rounded-2xl overflow-hidden pointer-events-none">
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 opacity-50"
+                  animate={{
+                    backgroundPosition: ['0% 0%', '100% 100%'],
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity, 
+                    repeatType: 'mirror' 
+                  }}
+                  style={{ backgroundSize: '200% 200%' }}
+                />
+              </div>
+              
+              {/* Header */}
+              <div className="flex items-center mb-5 border-b border-gray-800 pb-4 relative z-10">
+                <DripDogLogo width={48} height={48} className="rounded-full border-2 border-yellow-400" />
+                <div className="ml-3">
+                  <h3 className="text-xl font-bold text-white">DripDog Portal</h3>
                   <div className="flex items-center">
                     <span className="h-2 w-2 bg-green-500 rounded-full inline-block mr-2"></span>
-                    <p className="text-gray-400 text-sm">Online now</p>
+                    <p className="text-gray-400 text-sm">10,432 members online</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Portal Preview */}
+              <div className="relative z-10 mb-6">
+                <motion.div 
+                  className="aspect-w-16 aspect-h-9 bg-gray-900 rounded-lg overflow-hidden mb-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.div
+                      className="text-8xl"
+                      animate={partyMode ? { 
+                        rotate: [0, 10, -10, 0],
+                        scale: [1, 1.1, 0.9, 1]
+                      } : {}}
+                      transition={partyMode ? { 
+                        repeat: Infinity, 
+                        duration: 3
+                      } : {}}
+                    >
+                      🐕
+                    </motion.div>
+                    
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-70"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.7 }}
+                    />
+                    
+                    <motion.div 
+                      className="absolute bottom-4 left-0 right-0 text-center"
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.8 }}
+                    >
+                      <span className="font-bold text-white text-xl">Enter the Portal</span>
+                    </motion.div>
+                  </div>
+                </motion.div>
+                
+                {/* Quick message preview */}
+                <div className="flex items-center space-x-3 mb-3 bg-black bg-opacity-50 p-3 rounded-lg">
+                  <span className="text-2xl">💬</span>
+                  <div className="flex-1">
+                    <div className="text-white font-medium">Latest community chat</div>
+                    <p className="text-gray-400 text-sm">$DRIP is up 42.0% today! LFG! 🚀</p>
                   </div>
                 </div>
                 
-                <motion.a 
-                  href="https://t.me/NBT_portal" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-auto bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-4 py-2 rounded-full text-sm font-bold"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <i className="fas fa-door-open mr-1"></i> 
-                  Portal
-                </motion.a>
-              </div>
-              
-              {/* Chat Messages */}
-              <div className="space-y-4 mb-5 min-h-[200px] overflow-y-auto p-2">
-                {chatMessages.map((msg, index) => {
-                  const isBot = index % 2 === 1 || index === 2 || index === 5;
-                  const isCommand = msg.startsWith('/');
-                  
-                  return (
-                    <motion.div 
-                      key={index}
-                      className={`flex ${isBot ? 'justify-start' : 'justify-end'}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.2 }}
-                    >
-                      <div 
-                        className={`max-w-[80%] p-3 rounded-2xl ${
-                          isBot 
-                            ? isCommand 
-                              ? 'bg-yellow-400 text-black font-mono'
-                              : 'bg-gray-800 text-white' 
-                            : 'bg-yellow-400 bg-opacity-90 text-black'
-                        }`}
-                      >
-                        {msg}
-                        {(index === 5) && (
-                          <motion.div 
-                            className="mt-2 rounded-lg overflow-hidden w-48 h-48 bg-gray-900"
-                            animate={partyMode ? { rotate: [-2, 2, -2] } : {}}
-                            transition={partyMode ? { repeat: Infinity, duration: 2 } : {}}
-                          >
-                            <img 
-                              src="https://i.imgur.com/JPLEeVX.jpg" 
-                              alt="DripDog Meme" 
-                              className="w-full h-full object-cover" 
-                            />
-                          </motion.div>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-              
-              {/* Message Input */}
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Type a command like /woof..." 
-                  className="bg-black bg-opacity-60 border border-yellow-400 border-opacity-30 text-white rounded-full px-6 py-3 w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                />
-                <motion.button 
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-yellow-400 text-black rounded-full h-10 w-10 flex items-center justify-center"
-                  whileHover={{ scale: 1.1, rotate: 10 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <i className="fas fa-paper-plane"></i>
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-          
-          {/* Bot Commands & Call to Action */}
-          <motion.div 
-            className="lg:w-1/2 w-full text-center lg:text-left"
-            variants={fadeInRight}
-          >
-            <h3 className="text-2xl font-['Archivo_Black'] text-white mb-6">
-              Fun Commands to Try
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-              {botCommands.map((cmd, index) => (
-                <motion.div 
-                  key={index}
-                  className={`${cmd.color} rounded-xl p-4 border border-white border-opacity-10 flex items-center`}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.98 }}
-                  animate={partyMode ? { y: [0, -5, 0] } : {}}
-                  transition={partyMode ? { 
-                    y: { repeat: Infinity, duration: 2, delay: index * 0.2 } 
-                  } : {}}
-                >
-                  <span className="text-3xl mr-3">{cmd.emoji}</span>
-                  <div>
-                    <p className={`${cmd.textColor} font-mono font-bold`}>{cmd.command}</p>
-                    <p className="text-sm text-gray-300">{cmd.description}</p>
+                <div className="flex items-center space-x-3 bg-black bg-opacity-50 p-3 rounded-lg">
+                  <span className="text-2xl">🤖</span>
+                  <div className="flex-1">
+                    <div className="text-white font-medium">DripBot</div>
+                    <p className="text-gray-400 text-sm">Join now to access price alerts and DripDog memes</p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-            
-            <div className="text-center lg:text-left">
-              <motion.a 
-                href="https://t.me/NBT_portal" 
+                </div>
+              </div>
+              
+              {/* Portal Button */}
+              <motion.a
+                href="https://t.me/NBT_portal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-8 py-4 rounded-full text-lg font-bold hover:bg-opacity-90 transition shadow-[0_0_15px_rgba(253,224,71,0.4)]"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="block w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black py-3 rounded-xl text-center font-bold text-lg relative z-10 shadow-lg"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 animate={partyMode ? {
-                  y: [0, -5, 0],
-                  boxShadow: ['0 0 15px rgba(253,224,71,0.4)', '0 0 25px rgba(253,224,71,0.7)', '0 0 15px rgba(253,224,71,0.4)']
+                  y: [0, -3, 0],
+                  boxShadow: ['0 0 10px rgba(253,224,71,0.4)', '0 0 20px rgba(253,224,71,0.6)', '0 0 10px rgba(253,224,71,0.4)']
                 } : {}}
                 transition={partyMode ? { repeat: Infinity, duration: 2 } : {}}
               >
-                <i className="fas fa-dog mr-2"></i> Join DripDog Community
+                <i className="fas fa-door-open mr-2"></i> Enter the Portal
               </motion.a>
+            </motion.div>
+          </motion.div>
+          
+          {/* Community Benefits */}
+          <motion.div 
+            className="lg:w-1/2 w-full"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="space-y-5">
+              {portalFeatures.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-black bg-opacity-60 rounded-xl p-5 border border-yellow-400 border-opacity-10"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + (index * 0.15) }}
+                  whileHover={{ y: -5, boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
+                >
+                  <div className="flex items-start">
+                    <motion.div
+                      className={`w-12 h-12 rounded-full bg-gradient-to-br ${feature.color} flex items-center justify-center text-2xl flex-shrink-0`}
+                      animate={partyMode ? { rotate: [0, 10, -10, 0] } : {}}
+                      transition={partyMode ? { repeat: Infinity, duration: 3 } : {}}
+                    >
+                      {feature.emoji}
+                    </motion.div>
+                    <div className="ml-4">
+                      <h3 className="text-white font-bold text-lg">{feature.title}</h3>
+                      <p className="text-gray-300 mt-1">{feature.description}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
               
-              <p className="text-gray-400 mt-6">
-                Join our Telegram to access the bot, discuss $DRIP, and hang with the coolest community in crypto!
-              </p>
-              
-              {/* Testimonial */}
-              <motion.div 
-                className="mt-8 bg-black bg-opacity-60 p-4 rounded-xl border border-yellow-400 border-opacity-20 relative"
+              {/* Community Quote */}
+              <motion.div
+                className="mt-6 p-4 rounded-xl bg-black bg-opacity-50 border border-yellow-400 border-opacity-20"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
                 whileHover={{ scale: 1.02 }}
               >
                 <div className="flex items-center mb-3">
                   <span className="text-yellow-400 text-lg">⭐⭐⭐⭐⭐</span>
-                  <span className="ml-2 text-white">Much wow!</span>
                 </div>
                 <p className="text-gray-300 italic">
-                  "This bot is so dank, it's literally the only reason I check my phone anymore. DripDog memes are life."
+                  "The DripDog Telegram is where I found my crypto family. We laugh, we cry (mostly when we see those green candles), and we meme our way to the moon."
                 </p>
-                <p className="text-right text-yellow-400 mt-2 text-sm">- Anonymous Degen</p>
+                <p className="text-right text-yellow-400 mt-2 text-sm">- Loyal DripDog Fan</p>
+              </motion.div>
+              
+              <motion.div
+                className="mt-6 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+              >
+                <a
+                  href="https://t.me/NBT_portal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-yellow-400 font-medium"
+                >
+                  <span className="mr-2">Join 10,000+ others in the community</span>
+                  <i className="fas fa-arrow-right"></i>
+                </a>
               </motion.div>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
