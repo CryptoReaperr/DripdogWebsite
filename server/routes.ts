@@ -7,7 +7,31 @@ import axios from "axios";
 const REAL_TOKEN_ADDRESS = "rXKYBdFqtFuTbieQh2DBxuy6tCi8yDRY3h1kfwSpump";
 
 // Cache for token data to limit API requests
-let tokenDataCache = {
+interface TokenData {
+  name: string;
+  symbol: string;
+  price: {
+    current: string;
+    change: string;
+    volume: string;
+    marketCap: string;
+    holders: string;
+    circulatingSupply: string;
+  };
+  links: {
+    telegram: string;
+    twitter: string;
+    discord: string;
+    reddit: string;
+  };
+  tokenAddress: string;
+}
+
+let tokenDataCache: {
+  data: TokenData | null;
+  timestamp: number;
+  expiryMs: number;
+} = {
   data: null,
   timestamp: 0,
   expiryMs: 60000, // 1 minute cache
@@ -72,8 +96,8 @@ async function fetchTokenData() {
           ? `${(parseInt(tokenData.supply) / 1000000000).toFixed(1)}B ${defaultData.symbol}`
           : defaultData.price.circulatingSupply;
       }
-    } catch (error) {
-      console.error("Error fetching Solscan data:", error.message);
+    } catch (error: any) {
+      console.error("Error fetching Solscan data:", error.message || "Unknown error");
       // Fall back to default data if API fails
     }
 
@@ -112,8 +136,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const tokenData = await fetchTokenData();
       res.json(tokenData);
-    } catch (error) {
-      console.error("Error getting token info:", error);
+    } catch (error: any) {
+      console.error("Error getting token info:", error.message || error);
       res.status(500).json({ error: "Failed to fetch token information" });
     }
   });
@@ -126,8 +150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `https://public-api.solscan.io/token/meta?tokenAddress=${REAL_TOKEN_ADDRESS}`
       );
       res.json(solscanResponse.data);
-    } catch (error) {
-      console.error("Error fetching from Solscan:", error);
+    } catch (error: any) {
+      console.error("Error fetching from Solscan:", error.message || error);
       res.status(500).json({ error: "Failed to fetch Solscan data" });
     }
   });

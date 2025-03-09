@@ -1,35 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { fadeIn, fadeInUp, staggerChildren } from '../styles/animations';
+import { useAppContext } from '../context/AppContext';
 
 const Footer: React.FC = () => {
+  const { partyMode } = useAppContext();
+  
   const quickLinks = [
-    { name: 'About $DRIP', href: '#about' },
-    { name: 'Telegram Bot', href: '#bot' },
-    { name: 'How to Buy', href: '#buy' },
-    { name: '$Dripmap', href: '#roadmap' },
-  ];
-
-  const resources = [
-    { name: 'Documentation', href: '#' },
-    { name: 'Brand Assets', href: '#' },
-    { name: 'Media Kit', href: '#' },
-    { name: 'FAQs', href: '#' },
-  ];
-
-  const communityLinks = [
-    { name: 'Meme Contest', href: '#' },
-    { name: 'Events', href: '#' },
-    { name: 'Partners', href: '#' },
-    { name: 'Leaderboard', href: '#' },
+    { name: '🐕 About', href: '#about' },
+    { name: '🤖 Bot', href: '#bot' },
+    { name: '💰 Buy $DRIP', href: '#buy' },
   ];
 
   const socialLinks = [
-    { platform: 'telegram', url: 'https://t.me/dripdogcoin', icon: 'fab fa-telegram-plane', color: '[#0088cc]' },
-    { platform: 'twitter', url: 'https://twitter.com/DripDogSolana', icon: 'fab fa-twitter', color: '[#1DA1F2]' },
-    { platform: 'discord', url: 'https://discord.gg/dripdog', icon: 'fab fa-discord', color: '[#5865F2]' },
-    { platform: 'reddit', url: 'https://reddit.com/r/DripDogCoin', icon: 'fab fa-reddit-alien', color: '[#FF4500]' },
-    { platform: 'medium', url: 'https://medium.com/@DripDogSolana', icon: 'fab fa-medium-m', color: '[#00AB6C]' },
+    { platform: 'telegram', url: 'https://t.me/dripdogcoin', icon: 'fab fa-telegram-plane', color: 'text-[#0088cc]' },
+    { platform: 'telegram-portal', url: 'https://t.me/NBT_portal', icon: 'fas fa-door-open', color: 'text-[#0088cc]' },
+    { platform: 'twitter', url: 'https://twitter.com/DripDogSolana', icon: 'fab fa-twitter', color: 'text-[#1DA1F2]' },
+    { platform: 'discord', url: 'https://discord.gg/dripdog', icon: 'fab fa-discord', color: 'text-[#5865F2]' },
   ];
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -44,7 +31,7 @@ const Footer: React.FC = () => {
     <footer className="py-10 bg-black relative">
       <div className="container mx-auto px-6">
         <motion.div 
-          className="flex flex-col md:flex-row justify-between items-center mb-10"
+          className="flex flex-col items-center mb-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -52,15 +39,35 @@ const Footer: React.FC = () => {
         >
           <motion.a 
             href="#hero" 
-            className="mb-6 md:mb-0"
+            className="mb-6"
             variants={fadeIn}
             onClick={(e) => handleScrollTo(e, '#hero')}
+            whileHover={{ scale: 1.05 }}
           >
-            <span className="text-3xl font-['Archivo_Black'] text-white">DRIP<span className="text-orange-500">DOG</span></span>
+            <span className="text-3xl font-['Archivo_Black'] text-white">DRIP<span className="text-yellow-400">DOG</span></span>
           </motion.a>
           
+          {/* Portal Button - Prominently displayed */}
+          <motion.a
+            href="https://t.me/NBT_portal"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-8 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-8 py-3 rounded-full font-bold flex items-center shadow-[0_0_15px_rgba(253,224,71,0.4)]"
+            whileHover={{ scale: 1.05, y: -3 }}
+            whileTap={{ scale: 0.95 }}
+            animate={partyMode ? {
+              y: [0, -3, 0],
+              rotate: [-1, 1, -1]
+            } : {}}
+            transition={partyMode ? { repeat: Infinity, duration: 2 } : {}}
+          >
+            <i className="fas fa-door-open mr-2"></i> 
+            Enter the Telegram Portal
+          </motion.a>
+          
+          {/* Social Links */}
           <motion.div 
-            className="flex space-x-4"
+            className="flex space-x-6 mb-6"
             variants={fadeIn}
           >
             {socialLinks.map((link, index) => (
@@ -69,99 +76,55 @@ const Footer: React.FC = () => {
                 href={link.url} 
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`text-gray-400 hover:text-${link.color} transition`}
-                whileHover={{ scale: 1.2, rotate: 5 }}
+                className={`${link.color} transition`}
+                whileHover={{ scale: 1.2, rotate: partyMode ? [0, 10, -10] : 5 }}
+                transition={{
+                  rotate: partyMode ? { repeat: Infinity, duration: 0.5 } : {}
+                }}
               >
-                <i className={`${link.icon} text-2xl`}></i>
+                <i className={`${link.icon} text-3xl`}></i>
+              </motion.a>
+            ))}
+          </motion.div>
+          
+          {/* Quick Links */}
+          <motion.div 
+            className="flex flex-wrap justify-center gap-6 mb-6"
+            variants={fadeIn}
+          >
+            {quickLinks.map((link, index) => (
+              <motion.a 
+                key={index}
+                href={link.href} 
+                className="text-gray-300 hover:text-yellow-400 transition text-lg"
+                onClick={(e) => handleScrollTo(e, link.href)}
+                whileHover={{ scale: 1.1 }}
+              >
+                {link.name}
               </motion.a>
             ))}
           </motion.div>
         </motion.div>
         
         <motion.div 
-          className="border-t border-gray-800 pt-8 pb-4"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeIn}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-white font-['Archivo_Black'] text-xl mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                {quickLinks.map((link, index) => (
-                  <li key={index}>
-                    <a 
-                      href={link.href} 
-                      className="text-gray-400 hover:text-orange-500 transition"
-                      onClick={(e) => handleScrollTo(e, link.href)}
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-white font-['Archivo_Black'] text-xl mb-4">Resources</h3>
-              <ul className="space-y-2">
-                {resources.map((link, index) => (
-                  <li key={index}>
-                    <a href={link.href} className="text-gray-400 hover:text-orange-500 transition">
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-white font-['Archivo_Black'] text-xl mb-4">Community</h3>
-              <ul className="space-y-2">
-                {communityLinks.map((link, index) => (
-                  <li key={index}>
-                    <a href={link.href} className="text-gray-400 hover:text-orange-500 transition">
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-white font-['Archivo_Black'] text-xl mb-4">Newsletter</h3>
-              <p className="text-gray-400 mb-4">Stay updated with the latest $DRIP news and events.</p>
-              <div className="relative">
-                <input 
-                  type="email" 
-                  placeholder="Your email address" 
-                  className="bg-black border border-gray-700 text-white rounded-full px-6 py-3 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-500 text-white rounded-full h-9 w-9 flex items-center justify-center hover:bg-opacity-80 transition">
-                  <i className="fas fa-arrow-right"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-        
-        <motion.div 
-          className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center"
+          className="border-t border-gray-800 mt-6 pt-6 flex flex-col items-center text-center"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeInUp}
         >
-          <p className="text-gray-500 mb-4 md:mb-0">&copy; {new Date().getFullYear()} DripDog. All rights reserved.</p>
-          
           <motion.div 
-            className="bg-black bg-opacity-70 backdrop-blur-xl p-4 rounded-xl max-w-2xl text-center border border-white border-opacity-10"
+            className="bg-black bg-opacity-70 backdrop-blur-xl p-4 rounded-xl max-w-xl text-center border border-yellow-400 border-opacity-20 mb-6"
             whileHover={{ scale: 1.02 }}
           >
-            <h4 className="text-white font-bold mb-2">Legal Disclaimer</h4>
-            <p className="text-gray-400 text-sm">$DRIP is a meme coin with no intrinsic value or financial expectation. The token is purely for entertainment and community purposes. This is not financial advice. Always do your own research.</p>
+            <p className="text-gray-400 text-sm">
+              $DRIP is just a fluffy meme coin with no utility besides being adorable. 
+              This is not financial advice. DripDog lives for the memes. 
+              <span className="block mt-1">WOOF WOOF! 🐕💧</span>
+            </p>
           </motion.div>
+          
+          <p className="text-gray-500">&copy; {new Date().getFullYear()} DripDog. Much rights. Very reserved.</p>
         </motion.div>
       </div>
     </footer>
