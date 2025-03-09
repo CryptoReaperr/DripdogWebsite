@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import RealDripDog from '../assets/RealDripDog';
 import { fadeIn, fadeInUp, staggerChildren } from '../styles/animations';
 import { useAppContext } from '../context/AppContext';
@@ -13,298 +13,316 @@ const Hero: React.FC = () => {
     copyToClipboard 
   } = useAppContext();
   
+  const [showCopied, setShowCopied] = useState(false);
+  const [currentQuote, setCurrentQuote] = useState(0);
   const controls = useAnimation();
-  const textControls = useAnimation();
-  
+  const doggoControls = useAnimation();
+
+  // Dog animations
   useEffect(() => {
     if (partyMode) {
-      // Trigger chaotic animations
-      controls.start({
-        x: [0, -20, 15, -10, 0],
-        y: [0, 15, -20, 10, 0],
-        transition: { duration: 0.6, ease: "easeInOut" }
-      });
-      textControls.start({
-        scale: [1, 1.2, 0.9, 1.1, 1],
-        rotate: [0, -2, 3, -1, 0],
-        transition: { duration: 0.5 }
+      doggoControls.start({
+        rotate: [0, -5, 5, -5, 0],
+        scale: [1, 1.05, 0.95, 1.05, 1],
+        transition: { duration: 1.5, repeat: Infinity }
       });
     } else {
-      controls.start({ x: 0, y: 0 });
-      textControls.start({ scale: 1, rotate: 0 });
+      doggoControls.start({
+        y: [0, -10, 0],
+        transition: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+      });
     }
-  }, [partyMode, controls, textControls]);
+  }, [partyMode, doggoControls]);
 
-  const handleScrollToBot = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const botSection = document.querySelector('#bot');
-    if (botSection) {
-      botSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const dogPhrases = [
-    "Much wow!",
-    "Such gains!",
-    "Very moon!",
-    "Woof woof!",
-    "So drippy!",
-    "Buy the dip!",
-    "To the moon!"
+  // Fun dog quotes that change
+  const dogQuotes = [
+    { text: "I'm not just cute, I'm $DRIP-ping with potential!", emoji: "💧" },
+    { text: "Woof! Let's make this pawsome!", emoji: "🐾" },
+    { text: "Got treats? I accept $DRIP!", emoji: "🦴" },
+    { text: "Moon? Nah, we're going to Mars!", emoji: "🚀" },
+    { text: "My bark is worse than the dip!", emoji: "📈" },
+    { text: "You had me at woof...", emoji: "❤️" },
+    { text: "Copy my address! I won't bite!", emoji: "📋" }
   ];
   
-  const randomPhrase = () => {
-    return dogPhrases[Math.floor(Math.random() * dogPhrases.length)];
+  // Change quotes periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentQuote(prev => (prev + 1) % dogQuotes.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Custom copy to clipboard with visual feedback
+  const handleCopy = () => {
+    copyToClipboard(tokenAddress);
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 2000);
+    
+    // Bonus animation when copying
+    controls.start({
+      opacity: 1, 
+      y: 0,
+      scale: [1, 1.1, 1]
+    });
   };
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
-      {/* Background Elements - more chaotic and fun */}
-      <div className="absolute inset-0 overflow-hidden">
+    <section id="hero" className="min-h-screen flex flex-col items-center justify-center pt-10 pb-20 overflow-hidden px-4">
+      {/* Animated Background - simplified but fun */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div 
-          className="absolute -top-16 -right-16 w-64 h-64 bg-yellow-400 opacity-20 rounded-full filter blur-3xl"
+          className="absolute top-0 left-1/4 w-96 h-96 bg-yellow-400 opacity-10 rounded-full filter blur-3xl"
           animate={{ 
-            rotate: 360,
-            scale: partyMode ? [1, 1.2, 0.9, 1.3, 1] : 1
+            y: [0, 50, 0],
+            scale: partyMode ? [1, 1.1, 0.9, 1] : [1, 1.05, 1]
           }}
           transition={{ 
-            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-            scale: { duration: 5, repeat: Infinity, ease: "easeInOut" }
+            y: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+            scale: { duration: partyMode ? 5 : 10, repeat: Infinity, ease: "easeInOut" }
           }}
         />
         <motion.div 
-          className="absolute top-1/4 -left-24 w-80 h-80 bg-orange-500 opacity-20 rounded-full filter blur-3xl"
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500 opacity-10 rounded-full filter blur-3xl"
           animate={{ 
-            rotate: 360,
-            scale: partyMode ? [1, 0.8, 1.1, 0.9, 1] : 1
+            y: [0, -50, 0],
+            scale: partyMode ? [1, 0.9, 1.1, 1] : [1, 1.05, 1]
           }}
           transition={{ 
-            rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-            scale: { duration: 6, repeat: Infinity, ease: "easeInOut" }
-          }}
-        />
-        <motion.div 
-          className="absolute bottom-1/4 right-10 w-72 h-72 bg-orange-300 opacity-15 rounded-full filter blur-3xl"
-          animate={{ 
-            rotate: 360,
-            x: partyMode ? [0, 50, -30, 20, 0] : 0,
-            y: partyMode ? [0, -30, 20, -10, 0] : 0
-          }}
-          transition={{ 
-            rotate: { duration: 30, repeat: Infinity, ease: "linear" },
-            x: { duration: 8, repeat: Infinity },
-            y: { duration: 10, repeat: Infinity }
+            y: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+            scale: { duration: partyMode ? 5 : 10, repeat: Infinity, ease: "easeInOut" }
           }}
         />
       </div>
       
-      <div className="container mx-auto px-6 py-12 relative z-10">
-        <motion.div 
-          className="flex flex-col lg:flex-row items-center"
-          variants={staggerChildren}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div 
-            className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0"
-            variants={fadeInUp}
-            animate={textControls}
-          >
-            <motion.h1 
-              className="text-4xl md:text-6xl lg:text-7xl font-['Archivo_Black'] text-white leading-tight mb-4"
-              animate={controls}
-            >
-              Not Just A <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">Fluffy Boi.</span><br />
-              A <span className="text-yellow-400">Legend.</span>
-            </motion.h1>
-            
-            <motion.p 
-              className="text-xl md:text-2xl text-gray-300 mb-8 max-w-lg mx-auto lg:mx-0 font-['Inter']"
-              animate={controls}
-            >
-              The cutest meme coin on Solana with <span className="font-['Permanent_Marker'] text-yellow-400">maximum fluff</span>. No utility, just <span className="font-['Permanent_Marker'] text-orange-500">swagger</span> & pure vibes.
-            </motion.p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-6">
-              <motion.a
-                href={`https://jup.ag/swap/SOL-${tokenAddress}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-yellow-400 text-black px-10 py-4 rounded-full text-lg font-bold hover:bg-opacity-80 transition shadow-[0_0_15px_rgba(250,204,21,0.7)] hover:shadow-[0_0_25px_rgba(250,204,21,0.9)] hover:-translate-y-0.5 w-full sm:w-auto text-center"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <i className="fas fa-bone mr-2"></i> Get $DRIP
-              </motion.a>
-              <motion.a
-                href="#bot"
-                className="bg-black bg-opacity-70 backdrop-blur-xl text-white px-10 py-4 rounded-full text-lg font-bold hover:bg-white hover:bg-opacity-10 transition w-full sm:w-auto text-center border border-white border-opacity-10"
-                onClick={handleScrollToBot}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <i className="fas fa-paw mr-2"></i> Try The Bot
-              </motion.a>
-            </div>
-
-            {/* Party Mode Toggle */}
-            <motion.button
-              className="mt-6 px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-400 text-black rounded-full font-bold text-sm flex items-center justify-center mx-auto lg:mx-0"
-              onClick={togglePartyMode}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="mr-2">{partyMode ? "Chill Mode" : "Party Mode"}</span>
-              <i className={`fas ${partyMode ? "fa-moon" : "fa-sun"}`}></i>
-            </motion.button>
-            
-            {/* Token Stats - stylized and playful */}
-            <motion.div 
-              className="flex flex-wrap justify-center lg:justify-start mt-8 gap-4"
-              variants={staggerChildren}
-              initial="hidden"
-              animate="visible"
-            >
-              <motion.div 
-                className="bg-black bg-opacity-70 backdrop-blur-xl p-4 rounded-xl border border-yellow-400 border-opacity-30 transform rotate-1"
-                variants={fadeIn}
-                whileHover={{ rotate: 0, scale: 1.05 }}
-              >
-                <div className="flex items-center">
-                  <i className="fas fa-chart-line text-yellow-400 mr-2"></i>
-                  <p className="text-gray-400 text-sm">Market Cap</p>
-                </div>
-                <p className="font-['Archivo_Black'] text-2xl text-white">{price.marketCap}</p>
-              </motion.div>
-              
-              <motion.div 
-                className="bg-black bg-opacity-70 backdrop-blur-xl p-4 rounded-xl border border-yellow-400 border-opacity-30 transform -rotate-1"
-                variants={fadeIn}
-                whileHover={{ rotate: 0, scale: 1.05 }}
-              >
-                <div className="flex items-center">
-                  <i className="fas fa-users text-yellow-400 mr-2"></i>
-                  <p className="text-gray-400 text-sm">Holders</p>
-                </div>
-                <p className="font-['Archivo_Black'] text-2xl text-white">{price.holders}</p>
-              </motion.div>
-              
-              <motion.div 
-                className="bg-black bg-opacity-70 backdrop-blur-xl p-4 rounded-xl relative overflow-hidden border border-yellow-400 border-opacity-30 transform rotate-1"
-                variants={fadeIn}
-                whileHover={{ rotate: 0, scale: 1.05 }}
-              >
-                <motion.div 
-                  className="absolute -right-2 -bottom-2 w-12 h-12 bg-green-400 opacity-30 rounded-full filter blur-md"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                />
-                <div className="flex items-center">
-                  <i className="fas fa-rocket text-green-400 mr-2"></i>
-                  <p className="text-gray-400 text-sm">24h Change</p>
-                </div>
-                <p className="font-['Archivo_Black'] text-2xl text-green-400">{price.change}</p>
-              </motion.div>
-            </motion.div>
-            
-            {/* Token Address */}
+      {/* Party Mode Active Effects */}
+      {partyMode && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: 20 }).map((_, i) => (
             <motion.div
-              className="mt-8 p-4 bg-black bg-opacity-50 backdrop-blur-xl rounded-xl border border-yellow-400 border-opacity-20 transform hover:scale-105 transition-transform"
-              whileHover={{ y: -5 }}
-              onClick={() => copyToClipboard(tokenAddress)}
+              key={i}
+              className="absolute text-2xl"
+              initial={{ 
+                x: Math.random() * window.innerWidth, 
+                y: -30,
+                opacity: 0,
+                rotate: Math.random() * 360
+              }}
+              animate={{ 
+                y: window.innerHeight + 30,
+                opacity: [0, 1, 0],
+                rotate: [0, 360]
+              }}
+              transition={{ 
+                duration: 5 + Math.random() * 10,
+                repeat: Infinity,
+                delay: Math.random() * 20
+              }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-white font-bold">Token Address:</p>
-                <motion.button
-                  className="text-yellow-400 hover:text-yellow-300"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <i className="fas fa-copy"></i>
-                </motion.button>
-              </div>
-              <p className="text-gray-300 font-mono text-xs break-all cursor-pointer"
-                 onClick={() => copyToClipboard(tokenAddress)}>
-                {tokenAddress}
-              </p>
+              {['💧', '🐕', '💰', '🚀', '✨'][Math.floor(Math.random() * 5)]}
             </motion.div>
+          ))}
+        </div>
+      )}
+      
+      <div className="container mx-auto max-w-6xl z-10 flex flex-col items-center">
+        {/* Dog Character - Main Focus */}
+        <motion.div
+          className="relative mb-6 pt-10"
+          animate={doggoControls}
+        >
+          <RealDripDog className="mx-auto" width={220} height={220} animated={true} />
+          
+          {/* Speech Bubble */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuote}
+              className="absolute -top-8 right-0 sm:right-[-50px] bg-white text-black font-bold py-3 px-5 rounded-xl max-w-xs text-center shadow-lg"
+              initial={{ opacity: 0, y: -20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="absolute -bottom-2 left-10 w-4 h-4 bg-white transform rotate-45"></div>
+              {dogQuotes[currentQuote].text} {dogQuotes[currentQuote].emoji}
+            </motion.div>
+          </AnimatePresence>
+          
+          {/* Floating Elements */}
+          <motion.div 
+            className="absolute top-1/3 -left-4 sm:-left-10"
+            animate={{ 
+              y: [0, -10, 0],
+              rotate: partyMode ? [0, 360] : 0 
+            }}
+            transition={{ 
+              y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 3, repeat: Infinity }
+            }}
+          >
+            <span className="text-3xl">💧</span>
           </motion.div>
           
           <motion.div 
-            className="lg:w-1/2 relative"
-            variants={fadeIn}
-            animate={controls}
+            className="absolute bottom-0 right-0 sm:right-5"
+            animate={{ 
+              y: [0, 10, 0],
+              rotate: partyMode ? [0, -360] : 0
+            }}
+            transition={{ 
+              y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 3, repeat: Infinity }
+            }}
           >
-            {/* Real DripDog character */}
-            <div className="relative">
-              <RealDripDog className="mx-auto" width={300} height={300} animated={true} />
-              
-              {/* Speech bubble */}
-              <motion.div
-                className="absolute -top-10 right-10 bg-white text-black font-bold py-2 px-4 rounded-xl transform -rotate-6"
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ 
-                  opacity: [0, 1, 1, 0],
-                  scale: [0, 1, 1, 0],
-                  rotate: [-6, 6, -3, 6, -6]
-                }}
-                transition={{ 
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatDelay: 2
-                }}
-              >
-                <div className="absolute -bottom-2 left-6 w-4 h-4 bg-white transform rotate-45"></div>
-                {randomPhrase()}
-              </motion.div>
-              
-              {/* Floating elements */}
-              <motion.div 
-                className="absolute top-10 -left-6 w-16 h-16 flex items-center justify-center"
-                animate={{ 
-                  y: [0, -15, 0],
-                  rotate: partyMode ? [0, 360] : [0, 0]
-                }}
-                transition={{ 
-                  y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-                  rotate: { duration: 2, repeat: Infinity }
-                }}
-              >
-                <span className="text-3xl">💧</span>
-              </motion.div>
-              
-              <motion.div 
-                className="absolute bottom-10 right-0 w-16 h-16 flex items-center justify-center"
-                animate={{ 
-                  y: [0, 15, 0],
-                  x: partyMode ? [0, 20, 0, -20, 0] : [0, 0],
-                  rotate: partyMode ? [0, -360] : [0, 0]
-                }}
-                transition={{ 
-                  y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-                  x: { duration: 5, repeat: Infinity },
-                  rotate: { duration: 3, repeat: Infinity }
-                }}
-              >
-                <span className="text-3xl">🔥</span>
-              </motion.div>
-              
-              <motion.div 
-                className="absolute top-1/3 -right-10 w-16 h-16 flex items-center justify-center"
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  rotate: partyMode ? [0, 360] : [0, 0]
-                }}
-                transition={{ 
-                  scale: { duration: 2, repeat: Infinity },
-                  rotate: { duration: 2, repeat: Infinity }
-                }}
-              >
-                <span className="text-3xl">💰</span>
-              </motion.div>
-            </div>
+            <span className="text-3xl">🔥</span>
           </motion.div>
         </motion.div>
+        
+        {/* Main Title */}
+        <motion.h1 
+          className="text-5xl sm:text-7xl font-bold text-center text-white mb-4 px-4"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">$DRIP</span>DOG
+        </motion.h1>
+        
+        <motion.p 
+          className="text-xl text-gray-300 text-center mb-8 max-w-md px-4"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          No utility. No roadmap. Just a <span className="text-yellow-400 font-bold">fluffy boi</span> with swagger. The memest dog coin on Solana.
+        </motion.p>
+        
+        {/* Stats Pills */}
+        <motion.div 
+          className="flex flex-wrap justify-center gap-4 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <motion.div 
+            className="bg-black bg-opacity-50 backdrop-blur-sm px-5 py-2 rounded-full border border-yellow-400 border-opacity-30 flex items-center"
+            whileHover={{ scale: 1.05 }}
+          >
+            <span className="text-xl mr-2">📈</span>
+            <span className="text-white font-mono">{price.current}</span>
+          </motion.div>
+          
+          <motion.div 
+            className="bg-black bg-opacity-50 backdrop-blur-sm px-5 py-2 rounded-full border border-yellow-400 border-opacity-30 flex items-center"
+            whileHover={{ scale: 1.05 }}
+          >
+            <span className="text-xl mr-2">🚀</span>
+            <span className="text-green-400 font-mono">{price.change}</span>
+          </motion.div>
+          
+          <motion.div 
+            className="bg-black bg-opacity-50 backdrop-blur-sm px-5 py-2 rounded-full border border-yellow-400 border-opacity-30 flex items-center"
+            whileHover={{ scale: 1.05 }}
+          >
+            <span className="text-xl mr-2">👥</span>
+            <span className="text-white font-mono">{price.holders} holders</span>
+          </motion.div>
+        </motion.div>
+        
+        {/* Token Address Card */}
+        <motion.div
+          className="w-full max-w-lg mx-auto mb-8 bg-black bg-opacity-50 backdrop-blur-sm p-4 rounded-2xl border border-yellow-400 border-opacity-20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={controls}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          onClick={handleCopy}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <span className="text-xl mr-2">📋</span>
+              <h3 className="text-white font-bold">Token Address</h3>
+            </div>
+            
+            <AnimatePresence>
+              {showCopied ? (
+                <motion.span 
+                  className="text-green-400 text-sm bg-black bg-opacity-50 rounded-full px-2 py-1"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                >
+                  Copied! ✓
+                </motion.span>
+              ) : (
+                <motion.button
+                  className="text-yellow-400 hover:text-yellow-300 flex items-center bg-black bg-opacity-50 rounded-full px-2 py-1"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                >
+                  Copy <i className="fas fa-copy ml-1"></i>
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
+          
+          <p className="text-gray-300 font-mono text-xs break-all cursor-pointer bg-black bg-opacity-50 p-3 rounded-lg">
+            {tokenAddress}
+          </p>
+        </motion.div>
+        
+        {/* Action Buttons */}
+        <motion.div 
+          className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <motion.a
+            href={`https://jup.ag/swap/SOL-${tokenAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-8 py-4 rounded-full text-lg font-bold hover:bg-opacity-90 shadow-[0_0_15px_rgba(250,204,21,0.4)] w-full sm:w-auto text-center"
+            whileHover={{ scale: 1.05, y: -3 }}
+            whileTap={{ scale: 0.98 }}
+            animate={partyMode ? {
+              y: [0, -5, 0],
+              boxShadow: ['0 0 15px rgba(250,204,21,0.4)', '0 0 25px rgba(250,204,21,0.7)', '0 0 15px rgba(250,204,21,0.4)']
+            } : {}}
+            transition={partyMode ? { repeat: Infinity, duration: 2 } : {}}
+          >
+            <i className="fas fa-shopping-cart mr-2"></i> Buy $DRIP
+          </motion.a>
+          
+          <motion.a
+            href="https://t.me/NBT_portal"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-black bg-opacity-70 backdrop-blur-xl text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-white hover:bg-opacity-10 w-full sm:w-auto text-center border border-yellow-400 border-opacity-20"
+            whileHover={{ scale: 1.05, y: -3 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <i className="fab fa-telegram mr-2"></i> Join Telegram
+          </motion.a>
+        </motion.div>
+
+        {/* Party Mode Toggle */}
+        <motion.button
+          className="mt-6 px-5 py-2 bg-black bg-opacity-50 text-white rounded-full font-bold text-sm flex items-center justify-center mx-auto border border-yellow-400 border-opacity-30"
+          onClick={togglePartyMode}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <span className="mr-2">{partyMode ? "Chill Mode" : "Party Mode"}</span>
+          <i className={`fas ${partyMode ? "fa-moon" : "fa-sun"}`}></i>
+        </motion.button>
       </div>
     </section>
   );
