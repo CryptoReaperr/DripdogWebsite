@@ -55,10 +55,7 @@ function App() {
 // Website created by @Crypto_Reaperr
 export default App;
 
-// Placeholder components
-const Team = () => (
-  <div>
-    <h2>Team</h2>
+// No placeholder components needed - using imported components
     <ul>
       <li>@Shazza26</li>
       <li>@Howcryptic</li>
