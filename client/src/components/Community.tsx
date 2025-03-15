@@ -218,3 +218,31 @@ const Community: React.FC = () => {
 };
 
 export default Community;
+import React from 'react';
+
+const Community: React.FC = () => {
+  return (
+    <section id="community" className="py-20 bg-black">
+      <div className="container mx-auto px-6">
+        <h2 className="text-4xl font-bold text-white text-center mb-12">Community</h2>
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-xl text-gray-300 mb-8">
+            Join our vibrant community of DripDog enthusiasts and be part of the next big thing in the Solana ecosystem.
+          </p>
+          <div className="flex justify-center gap-6">
+            <a href="https://t.me/DripDogSOL" target="_blank" rel="noopener noreferrer" 
+               className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-full font-bold transition">
+              Join Telegram
+            </a>
+            <a href="https://twitter.com/DripDogSOL" target="_blank" rel="noopener noreferrer"
+               className="bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white px-8 py-3 rounded-full font-bold transition">
+              Follow Twitter
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Community;

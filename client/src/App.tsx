@@ -9,6 +9,8 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import HowToBuy from "./components/HowToBuy";
 import Footer from "./components/Footer";
+import Community from "./components/Community"; // Added
+import Team from "./components/Team"; // Added
 
 function App() {
   const { scrollYProgress } = useScroll();
@@ -26,7 +28,7 @@ function App() {
       radial-gradient(circle at 80% 70%, rgba(249, 115, 22, 0.08) 0%, transparent 50%)
     `;
     document.body.style.scrollBehavior = "smooth";
-    
+
     return () => {
       document.body.classList.remove('bg-drip-dark');
       document.body.style.backgroundImage = '';
@@ -41,6 +43,8 @@ function App() {
       <main>
         <Hero />
         <HowToBuy />
+        <Community /> {/* Added */}
+        <Team /> {/* Added */}
       </main>
       <Footer />
       <Toaster />
@@ -48,4 +52,19 @@ function App() {
   );
 }
 
+// Website created by @Crypto_Reaperr
 export default App;
+
+// Placeholder components
+const Community = () => <div>Community Content Here</div>;
+const Team = () => (
+  <div>
+    <h2>Team</h2>
+    <ul>
+      <li>@Shazza26</li>
+      <li>@Howcryptic</li>
+      <li>@Swaffelpaard</li>
+      <li>@tryptoknight</li>
+    </ul>
+  </div>
+);

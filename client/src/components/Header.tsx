@@ -23,11 +23,7 @@ const Header: React.FC = () => {
   }, [scrolled]);
 
   const navItems = [
-    { title: 'About', href: '#about' },
-    { title: 'Bot', href: '#bot' },
-    { title: 'Price', href: '#price' },
     { title: 'How to Buy', href: '#buy' },
-    { title: '$Dripmap', href: '#roadmap' },
     { title: 'Community', href: '#community' },
     { title: 'Team', href: '#team' },
   ];
