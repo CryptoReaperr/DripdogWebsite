@@ -118,44 +118,7 @@ const Team: React.FC = () => {
         </motion.div>
       </div>
 
-      <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .preserve-3d {
-          transform-style: preserve-3d;
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
-      `}</style>
-    </section>
-  );
-};
 
-export default Team;
-import React from 'react';
-
-const Team: React.FC = () => {
-  return (
-    <section id="team" className="py-20 bg-black">
-      <div className="container mx-auto px-6">
-        <h2 className="text-4xl font-bold text-white text-center mb-12">Team</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          {['Shazza26', 'Howcryptic', 'Swaffelpaard', 'tryptoknight'].map((member) => (
-            <div key={member} className="text-center">
-              <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-purple-600" />
-              <h3 className="text-xl font-bold text-white mb-2">@{member}</h3>
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-16 text-sm text-gray-500">
-          <p>Website crafted by @Crypto_Reaperr</p>
-        </div>
-      </div>
     </section>
   );
 };

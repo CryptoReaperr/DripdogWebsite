@@ -1,22 +1,19 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Team } from './components/Team';
-import { Community } from './components/Community';
-import { Roadmap } from './components/Roadmap';
+import { Route, Switch } from 'wouter';
+import Team from './components/Team';
+import Community from './components/Community';
+import Roadmap from './components/Roadmap';
 import { Home } from '@/components/Home';
 
 const App = () => {
   return (
-    <Router>
-      <div className="app-container">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/roadmap" element={<Roadmap />} />
-        </Routes>
-      </div>
-    </Router>
+    <div className="app-container">
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/team" component={Team} />
+        <Route path="/community" component={Community} />
+        <Route path="/roadmap" component={Roadmap} />
+      </Switch>
+    </div>
   );
 };
 
