@@ -1,10 +1,32 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import axios from "axios";
+import { z } from "zod";
+import { insertAdminContentSchema } from "@shared/schema";
 
 // Real token address from pump.fun
 const REAL_TOKEN_ADDRESS = "rXKYBdFqtFuTbieQh2DBxuy6tCi8yDRY3h1kfwSpump";
+
+// Session token for admin authentication
+let adminSessionToken: string | null = null;
+
+// Authentication middleware
+const requireAdminAuth = async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized - Missing or invalid token format' });
+  }
+  
+  const token = authHeader.split(' ')[1];
+  
+  if (token !== adminSessionToken || !adminSessionToken) {
+    return res.status(401).json({ error: 'Unauthorized - Invalid or expired token' });
+  }
+  
+  next();
+};
 
 // Cache for token data to limit API requests
 interface TokenData {
@@ -274,6 +296,149 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     res.json({ response });
+  });
+  
+  // =====================
+  // ADMIN PANEL ENDPOINTS
+  // =====================
+  
+  // Admin login endpoint
+  app.post('/api/admin/login', async (req, res) => {
+    try {
+      const { password } = req.body;
+      
+      if (!password) {
+        return res.status(400).json({ error: 'Password is required' });
+      }
+      
+      const isValid = await storage.verifyAdminPassword(password);
+      
+      if (!isValid) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // Generate a session token (simple UUID in this case, could be a JWT in production)
+      adminSessionToken = Math.random().toString(36).substring(2, 15) + 
+                         Math.random().toString(36).substring(2, 15) +
+                         Date.now().toString(36);
+      
+      res.json({ 
+        success: true, 
+        token: adminSessionToken,
+        message: 'Login successful'
+      });
+    } catch (error: any) {
+      console.error('Admin login error:', error.message || error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+  // Admin logout endpoint
+  app.post('/api/admin/logout', requireAdminAuth, (req, res) => {
+    adminSessionToken = null;
+    res.json({ success: true, message: 'Logged out successfully' });
+  });
+  
+  // Change admin password endpoint
+  app.post('/api/admin/change-password', requireAdminAuth, async (req, res) => {
+    try {
+      const { newPassword } = req.body;
+      
+      if (!newPassword || newPassword.length < 8) {
+        return res.status(400).json({ 
+          error: 'New password is required and must be at least 8 characters long'
+        });
+      }
+      
+      await storage.setAdminPassword(newPassword);
+      
+      res.json({ 
+        success: true, 
+        message: 'Password changed successfully'
+      });
+    } catch (error: any) {
+      console.error('Change password error:', error.message || error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+  // Get all editable content sections
+  app.get('/api/admin/content', requireAdminAuth, async (req, res) => {
+    try {
+      const allContent = await storage.getAllAdminContent();
+      res.json(allContent);
+    } catch (error: any) {
+      console.error('Get admin content error:', error.message || error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+  // Get specific content section
+  app.get('/api/admin/content/:section', async (req, res) => {
+    try {
+      const { section } = req.params;
+      const content = await storage.getAdminContent(section);
+      
+      if (!content) {
+        return res.status(404).json({ error: 'Content section not found' });
+      }
+      
+      res.json(content);
+    } catch (error: any) {
+      console.error(`Get content section error for ${req.params.section}:`, error.message || error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+  // Create or update content section
+  app.post('/api/admin/content/:section', requireAdminAuth, async (req, res) => {
+    try {
+      const { section } = req.params;
+      const { content } = req.body;
+      
+      // Validate content with Zod schema
+      try {
+        // Only validate the structure, not all fields are required for updates
+        const contentSchema = z.object({
+          content: z.any(),
+        });
+        
+        contentSchema.parse(req.body);
+      } catch (validationError: any) {
+        return res.status(400).json({ 
+          error: 'Invalid content structure', 
+          details: validationError.errors 
+        });
+      }
+      
+      const lastUpdated = new Date().toISOString();
+      const existingContent = await storage.getAdminContent(section);
+      
+      let result;
+      if (existingContent) {
+        // Update existing content
+        result = await storage.updateAdminContent(section, { 
+          content, 
+          lastUpdated 
+        });
+      } else {
+        // Create new content section
+        result = await storage.createAdminContent({ 
+          section, 
+          content, 
+          lastUpdated 
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Content for ${section} ${existingContent ? 'updated' : 'created'} successfully`,
+        data: result
+      });
+    } catch (error: any) {
+      console.error(`Update content section error for ${req.params.section}:`, error.message || error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
   const httpServer = createServer(app);
