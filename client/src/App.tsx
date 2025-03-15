@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Team } from './components/Team';
 import { Community } from './components/Community';
 import { Roadmap } from './components/Roadmap';
-import { Home } from './components/Home';
+import { Home } from '@/components/Home';
 
 const App = () => {
   return (
