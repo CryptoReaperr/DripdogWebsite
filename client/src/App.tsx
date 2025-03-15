@@ -56,7 +56,6 @@ function App() {
 export default App;
 
 // Placeholder components
-const Community = () => <div>Community Content Here</div>;
 const Team = () => (
   <div>
     <h2>Team</h2>
