@@ -54,11 +54,6 @@ function App() {
 
 // Website created by @Crypto_Reaperr
 export default App;
-
-// No placeholder components needed - using imported components
-    <ul>
-      <li>@Shazza26</li>
-      <li>@Howcryptic</li>
       <li>@Swaffelpaard</li>
       <li>@tryptoknight</li>
     </ul>
