@@ -1,68 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
-interface HowToBuyEditorProps {
-  token: string | null;
-}
-
-// Schema for a single step
+// Step schema
 const stepSchema = z.object({
-  title: z.string().min(1, { message: 'Title is required' }),
-  description: z.string().min(1, { message: 'Description is required' }),
+  title: z.string().min(1, { message: 'Step title is required' }),
+  description: z.string().min(1, { message: 'Step description is required' }),
   icon: z.string().optional(),
 });
 
-// Schema for the how to buy section content
+// Form validation schema
 const howToBuySchema = z.object({
   title: z.string().min(1, { message: 'Title is required' }),
   subtitle: z.string().min(1, { message: 'Subtitle is required' }),
   steps: z.array(stepSchema).min(1, { message: 'At least one step is required' }),
 });
 
+interface HowToBuyEditorProps {
+  token: string | null;
+}
+
 type Step = z.infer<typeof stepSchema>;
 type HowToBuyContent = z.infer<typeof howToBuySchema>;
 
 const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-
+  
   // Default values
   const defaultValues: HowToBuyContent = {
-    title: 'How To Buy $DRIP',
-    subtitle: 'Get your paws on $DRIP in just a few simple steps',
+    title: 'How to Buy $DRIP',
+    subtitle: 'Follow these simple steps to join the DripDog community',
     steps: [
       {
-        title: 'Create a Solana Wallet',
-        description: 'Download Phantom, Solflare, or another Solana-compatible wallet and set it up.',
-        icon: 'Wallet'
+        title: 'Get a Solana Wallet',
+        description: 'Download Phantom, Solflare or another Solana wallet and set it up.',
+        icon: 'wallet'
       },
       {
-        title: 'Get SOL',
-        description: 'Purchase SOL from an exchange and transfer it to your wallet.',
-        icon: 'Coins'
+        title: 'Purchase SOL',
+        description: 'Buy SOL from an exchange like Coinbase or Binance and transfer it to your wallet.',
+        icon: 'coins'
       },
       {
-        title: 'Connect to DEX',
-        description: 'Visit Jupiter or Raydium and connect your wallet.',
-        icon: 'Link'
+        title: 'Connect to Jupiter',
+        description: 'Go to Jupiter Exchange (jup.ag) and connect your wallet.',
+        icon: 'link'
       },
       {
-        title: 'Swap for $DRIP',
-        description: 'Swap your SOL for $DRIP using the token address below.',
-        icon: 'ArrowRightLeft'
+        title: 'Swap SOL for $DRIP',
+        description: 'Enter the DripDog token address and swap your SOL for $DRIP tokens.',
+        icon: 'repeat'
       }
     ]
   };
@@ -72,13 +79,13 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
     resolver: zodResolver(howToBuySchema),
     defaultValues,
   });
-
+  
   // Get the steps array from the form
   const { fields, append, remove } = form.useFieldArray({
     name: 'steps',
     control: form.control,
   });
-
+  
   // Load content on component mount
   useEffect(() => {
     const loadContent = async () => {
@@ -94,7 +101,7 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
           form.reset(response.data.content);
         }
       } catch (err: any) {
-        console.error('Error loading how to buy content:', err);
+        console.error('Error loading howToBuy content:', err);
         
         // Don't show error if the content doesn't exist yet (404)
         if (err.response?.status !== 404) {
@@ -112,7 +119,7 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
     
     loadContent();
   }, [token, form, toast]);
-
+  
   // Submit handler
   const onSubmit = async (data: HowToBuyContent) => {
     if (!token) {
@@ -140,12 +147,12 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
       if (response.data.success) {
         toast({
           title: 'Saved successfully',
-          description: 'How To Buy section content has been updated',
+          description: 'How to buy section content has been updated',
           variant: 'default',
         });
       }
     } catch (err: any) {
-      console.error('Error saving how to buy content:', err);
+      console.error('Error saving howToBuy content:', err);
       setError(err.response?.data?.error || 'Failed to save content');
       toast({
         title: 'Error saving content',
@@ -156,7 +163,7 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
       setIsSaving(false);
     }
   };
-
+  
   // Add a new step to the form
   const addStep = () => {
     append({
@@ -165,7 +172,7 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
       icon: ''
     });
   };
-
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -173,7 +180,7 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
       </div>
     );
   }
-
+  
   return (
     <div>
       <Card className="bg-black/40 border-yellow-500/20">
@@ -218,7 +225,7 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium text-yellow-400">Steps</h3>
+                  <h3 className="text-lg font-medium text-yellow-400">Steps to Buy</h3>
                   <Button
                     type="button"
                     variant="outline"
@@ -255,7 +262,7 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
                         name={`steps.${index}.title`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-200">Title</FormLabel>
+                            <FormLabel className="text-slate-200">Step Title</FormLabel>
                             <FormControl>
                               <Input 
                                 {...field} 
@@ -272,11 +279,11 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
                         name={`steps.${index}.icon`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-200">Icon Name</FormLabel>
+                            <FormLabel className="text-slate-200">Icon Name (Optional)</FormLabel>
                             <FormControl>
                               <Input 
                                 {...field} 
-                                placeholder="Wallet, Coins, Link, etc."
+                                placeholder="wallet, coins, link, etc"
                                 className="bg-black/50 border-yellow-400/30 text-slate-100"
                               />
                             </FormControl>
@@ -292,7 +299,7 @@ const HowToBuyEditor: React.FC<HowToBuyEditorProps> = ({ token }) => {
                         name={`steps.${index}.description`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-200">Description</FormLabel>
+                            <FormLabel className="text-slate-200">Step Description</FormLabel>
                             <FormControl>
                               <Textarea 
                                 {...field} 

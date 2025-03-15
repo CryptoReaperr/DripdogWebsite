@@ -1,75 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
-interface CommunityEditorProps {
-  token: string | null;
-}
-
-// Schema for a social platform
+// Social platform schema
 const socialSchema = z.object({
-  name: z.string().min(1, { message: 'Platform name is required' }),
+  name: z.string().min(1, { message: 'Name is required' }),
   url: z.string().url({ message: 'Must be a valid URL' }),
   description: z.string().min(1, { message: 'Description is required' }),
   icon: z.string().optional(),
 });
 
-// Schema for the community section content
+// Form validation schema
 const communitySchema = z.object({
   title: z.string().min(1, { message: 'Title is required' }),
   subtitle: z.string().min(1, { message: 'Subtitle is required' }),
   description: z.string().min(1, { message: 'Description is required' }),
-  platforms: z.array(socialSchema).min(1, { message: 'At least one social platform is required' }),
+  platforms: z.array(socialSchema).min(1, { message: 'At least one platform is required' }),
 });
+
+interface CommunityEditorProps {
+  token: string | null;
+}
 
 type Social = z.infer<typeof socialSchema>;
 type CommunityContent = z.infer<typeof communitySchema>;
 
 const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-
+  
   // Default values
   const defaultValues: CommunityContent = {
-    title: 'Join Our Growing Community',
-    subtitle: 'Connect with the DripDog pack across multiple platforms',
-    description: "DripDog is more than just a token—it's a community of enthusiasts, creators, and believers. Join us and help shape the future of $DRIP.",
+    title: 'Join the DripDog Community',
+    subtitle: 'Connect with fellow holders across all platforms',
+    description: 'DripDog isn\'t just a token, it\'s a vibrant community of stylish crypto enthusiasts. Join us on any of our social platforms to stay updated on the latest news, events, and memes.',
     platforms: [
       {
         name: 'Telegram',
         url: 'https://t.me/dripdogcoin',
-        description: 'Join our active Telegram for real-time updates, community discussions, and direct contact with the team.',
+        description: 'Join our active Telegram group for real-time updates and discussions with the community and team.',
         icon: 'telegram'
       },
       {
         name: 'Twitter',
         url: 'https://twitter.com/DripDogSolana',
-        description: 'Follow us on Twitter for the latest announcements, memes, and community highlights.',
+        description: 'Follow us on Twitter for the latest announcements, partnerships, and community highlights.',
         icon: 'twitter'
       },
       {
         name: 'Discord',
         url: 'https://discord.gg/dripdog',
-        description: 'Join our Discord server for in-depth technical discussions and community building.',
+        description: 'Join our Discord server for in-depth discussions, community events, and exclusive content.',
         icon: 'discord'
-      },
-      {
-        name: 'Reddit',
-        url: 'https://reddit.com/r/DripDogCoin',
-        description: 'Subscribe to our subreddit for community-created content and discussions.',
-        icon: 'reddit'
       }
     ]
   };
@@ -79,13 +80,13 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
     resolver: zodResolver(communitySchema),
     defaultValues,
   });
-
+  
   // Get the platforms array from the form
   const { fields, append, remove } = form.useFieldArray({
     name: 'platforms',
     control: form.control,
   });
-
+  
   // Load content on component mount
   useEffect(() => {
     const loadContent = async () => {
@@ -119,7 +120,7 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
     
     loadContent();
   }, [token, form, toast]);
-
+  
   // Submit handler
   const onSubmit = async (data: CommunityContent) => {
     if (!token) {
@@ -163,7 +164,7 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
       setIsSaving(false);
     }
   };
-
+  
   // Add a new platform to the form
   const addPlatform = () => {
     append({
@@ -173,7 +174,7 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
       icon: ''
     });
   };
-
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -181,7 +182,7 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
       </div>
     );
   }
-
+  
   return (
     <div>
       <Card className="bg-black/40 border-yellow-500/20">
@@ -260,7 +261,7 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
                 {fields.map((field, index) => (
                   <div key={field.id} className="p-4 border border-yellow-400/20 rounded-lg bg-black/30">
                     <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-md font-medium text-yellow-300">Platform {index + 1}</h4>
+                      <h4 className="text-md font-medium text-yellow-300">Social Platform {index + 1}</h4>
                       {fields.length > 1 && (
                         <Button
                           type="button"
@@ -285,7 +286,7 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
                             <FormControl>
                               <Input 
                                 {...field} 
-                                placeholder="Telegram, Twitter, etc."
+                                placeholder="Telegram, Twitter, Discord, etc."
                                 className="bg-black/50 border-yellow-400/30 text-slate-100"
                               />
                             </FormControl>
@@ -299,11 +300,11 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
                         name={`platforms.${index}.icon`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-200">Icon Name</FormLabel>
+                            <FormLabel className="text-slate-200">Icon Name (Optional)</FormLabel>
                             <FormControl>
                               <Input 
                                 {...field} 
-                                placeholder="telegram, twitter, etc."
+                                placeholder="telegram, twitter, discord, etc."
                                 className="bg-black/50 border-yellow-400/30 text-slate-100"
                               />
                             </FormControl>
@@ -319,11 +320,11 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
                         name={`platforms.${index}.url`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-200">URL</FormLabel>
+                            <FormLabel className="text-slate-200">Platform URL</FormLabel>
                             <FormControl>
                               <Input 
                                 {...field} 
-                                placeholder="https://example.com"
+                                placeholder="https://..."
                                 className="bg-black/50 border-yellow-400/30 text-slate-100"
                               />
                             </FormControl>
@@ -339,7 +340,7 @@ const CommunityEditor: React.FC<CommunityEditorProps> = ({ token }) => {
                         name={`platforms.${index}.description`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-200">Description</FormLabel>
+                            <FormLabel className="text-slate-200">Platform Description</FormLabel>
                             <FormControl>
                               <Textarea 
                                 {...field} 

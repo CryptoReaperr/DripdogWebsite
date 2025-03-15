@@ -1,59 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+
+// Form validation schema
+const heroSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required' }),
+  subtitle: z.string().min(1, { message: 'Subtitle is required' }),
+  description: z.string().min(1, { message: 'Description is required' }),
+  buttonText: z.string().min(1, { message: 'Button text is required' }),
+  buttonUrl: z.string().url({ message: 'Must be a valid URL' }),
+  imageUrl: z.string().optional(),
+});
 
 interface HeroEditorProps {
   token: string | null;
 }
 
-// Schema for the hero section content
-const heroSchema = z.object({
-  title: z.string().min(1, { message: 'Title is required' }),
-  subtitle: z.string().min(1, { message: 'Subtitle is required' }),
-  description: z.string().min(1, { message: 'Description is required' }),
-  ctaButtonText: z.string().min(1, { message: 'CTA button text is required' }),
-  ctaButtonLink: z.string().url({ message: 'Must be a valid URL' }).optional().or(z.literal('')),
-  secondaryButtonText: z.string().optional(),
-  secondaryButtonLink: z.string().url({ message: 'Must be a valid URL' }).optional().or(z.literal('')),
-  tokenAddress: z.string(),
-});
-
 type HeroContent = z.infer<typeof heroSchema>;
 
 const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-
+  
   // Default values
   const defaultValues: HeroContent = {
     title: 'DripDog',
-    subtitle: 'The Solana Meme Coin With Street Cred',
-    description: 'Forget basic meme coins. DripDog brings style, swagger, and a touch of street culture to Solana. Join the pack and get your $DRIP.',
-    ctaButtonText: 'Buy $DRIP',
-    ctaButtonLink: 'https://jup.ag/swap/SOL-DRIP',
-    secondaryButtonText: 'Join Telegram',
-    secondaryButtonLink: 'https://t.me/dripdogcoin',
-    tokenAddress: 'rXKYBdFqtFuTbieQh2DBxuy6tCi8yDRY3h1kfwSpump',
+    subtitle: 'The Flyest Meme Coin on Solana',
+    description: "Join the pack and experience the freshest meme coin on the Solana blockchain. We're not just a token - we're a lifestyle, a community, and the next big thing in crypto culture.",
+    buttonText: 'Buy $DRIP',
+    buttonUrl: 'https://jup.ag/swap/SOL-DRIP',
+    imageUrl: '/assets/images/dripdog.jpg'
   };
-
+  
   // Initialize form with default or loaded values
   const form = useForm<HeroContent>({
     resolver: zodResolver(heroSchema),
     defaultValues,
   });
-
+  
   // Load content on component mount
   useEffect(() => {
     const loadContent = async () => {
@@ -87,7 +90,7 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
     
     loadContent();
   }, [token, form, toast]);
-
+  
   // Submit handler
   const onSubmit = async (data: HeroContent) => {
     if (!token) {
@@ -131,7 +134,7 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
       setIsSaving(false);
     }
   };
-
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -139,7 +142,7 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
       </div>
     );
   }
-
+  
   return (
     <div>
       <Card className="bg-black/40 border-yellow-500/20">
@@ -152,7 +155,7 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-200">Main Title</FormLabel>
+                      <FormLabel className="text-slate-200">Hero Title</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
@@ -169,7 +172,7 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
                   name="subtitle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-200">Subtitle</FormLabel>
+                      <FormLabel className="text-slate-200">Hero Subtitle</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
@@ -187,11 +190,11 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-200">Description</FormLabel>
+                    <FormLabel className="text-slate-200">Hero Description</FormLabel>
                     <FormControl>
                       <Textarea 
                         {...field} 
-                        rows={4}
+                        rows={3}
                         className="bg-black/50 border-yellow-400/30 text-slate-100"
                       />
                     </FormControl>
@@ -203,10 +206,10 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
               <div className="grid grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="ctaButtonText"
+                  name="buttonText"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-200">CTA Button Text</FormLabel>
+                      <FormLabel className="text-slate-200">Button Text</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
@@ -220,49 +223,14 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
                 
                 <FormField
                   control={form.control}
-                  name="ctaButtonLink"
+                  name="buttonUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-200">CTA Button Link</FormLabel>
+                      <FormLabel className="text-slate-200">Button URL</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
-                          placeholder="https://example.com"
-                          className="bg-black/50 border-yellow-400/30 text-slate-100"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="secondaryButtonText"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-200">Secondary Button Text</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          className="bg-black/50 border-yellow-400/30 text-slate-100"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="secondaryButtonLink"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-200">Secondary Button Link</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="https://example.com"
+                          placeholder="https://..."
                           className="bg-black/50 border-yellow-400/30 text-slate-100"
                         />
                       </FormControl>
@@ -274,19 +242,17 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ token }) => {
               
               <FormField
                 control={form.control}
-                name="tokenAddress"
+                name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-200">Token Address</FormLabel>
+                    <FormLabel className="text-slate-200">Hero Image URL (Optional)</FormLabel>
                     <FormControl>
                       <Input 
                         {...field} 
-                        className="bg-black/50 border-yellow-400/30 text-slate-100 font-mono"
+                        placeholder="/assets/images/..."
+                        className="bg-black/50 border-yellow-400/30 text-slate-100"
                       />
                     </FormControl>
-                    <FormDescription className="text-slate-400">
-                      The Solana token address used throughout the site
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
