@@ -68,37 +68,135 @@ async function fetchTokenData() {
       tokenAddress: REAL_TOKEN_ADDRESS
     };
 
-    // Try to fetch real data from Solscan
+    // Try multiple token data sources for resilience
     try {
-      const solscanTokenData = await axios.get(
-        `https://public-api.solscan.io/token/meta?tokenAddress=${REAL_TOKEN_ADDRESS}`
+      // Try Birdeye API - better real-time data
+      const birdeyeResponse = await axios.get(
+        `https://public-api.birdeye.so/public/tokenlist?address=${REAL_TOKEN_ADDRESS}`,
+        {
+          headers: {
+            'x-chain': 'solana',
+            'x-api-key': 'BIRDEYE_PUBLIC_API' // Public rate-limited key for demo purposes
+          }
+        }
       );
       
-      const solscanHolderData = await axios.get(
-        `https://public-api.solscan.io/token/holders?tokenAddress=${REAL_TOKEN_ADDRESS}&offset=0&limit=10`
-      );
-
-      const solscanMarketData = await axios.get(
-        `https://public-api.solscan.io/market?symbol=SOL/USD`
-      );
-
-      // Extract real data if available
-      if (solscanTokenData.data) {
-        const tokenData = solscanTokenData.data;
-        const holderCount = solscanHolderData.data?.data?.total || defaultData.price.holders;
-        const solPrice = solscanMarketData.data?.priceUsdt || 0;
+      if (birdeyeResponse.data && birdeyeResponse.data.success && birdeyeResponse.data.data && birdeyeResponse.data.data.tokens) {
+        const tokenData = birdeyeResponse.data.data.tokens[0];
         
-        // Format and update the data
-        defaultData.name = tokenData.name || defaultData.name;
-        defaultData.symbol = tokenData.symbol || defaultData.symbol;
-        defaultData.price.holders = typeof holderCount === 'number' ? holderCount.toLocaleString() : holderCount;
-        defaultData.price.circulatingSupply = tokenData.supply 
-          ? `${(parseInt(tokenData.supply) / 1000000000).toFixed(1)}B ${defaultData.symbol}`
-          : defaultData.price.circulatingSupply;
+        if (tokenData) {
+          const price = tokenData.price || 0;
+          const priceChange = tokenData.priceChange24h || 0;
+          const volume = tokenData.volume24h || 0;
+          
+          // Calculate holders - this might not be available from this API
+          const holders = defaultData.price.holders;
+          
+          // Format values for display
+          const formatCurrency = (value: number) => {
+            if (value >= 1000000000) {
+              return `$${(value / 1000000000).toFixed(2)}B`;
+            } else if (value >= 1000000) {
+              return `$${(value / 1000000).toFixed(2)}M`;
+            } else if (value >= 1000) {
+              return `$${(value / 1000).toFixed(2)}K`;
+            }
+            return `$${value.toFixed(6)}`;
+          };
+          
+          // Update with real data from Birdeye
+          defaultData.name = tokenData.name || defaultData.name;
+          defaultData.symbol = tokenData.symbol || defaultData.symbol;
+          defaultData.price.current = formatCurrency(price);
+          defaultData.price.change = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
+          defaultData.price.volume = formatCurrency(volume);
+          defaultData.price.marketCap = formatCurrency(price * (tokenData.supply || 0));
+          
+          // Format supply
+          let supply = tokenData.supply || 0;
+          if (supply >= 1000000000) {
+            defaultData.price.circulatingSupply = `${(supply / 1000000000).toFixed(1)}B ${defaultData.symbol}`;
+          } else if (supply >= 1000000) {
+            defaultData.price.circulatingSupply = `${(supply / 1000000).toFixed(1)}M ${defaultData.symbol}`;
+          } else {
+            defaultData.price.circulatingSupply = `${supply.toLocaleString()} ${defaultData.symbol}`;
+          }
+        }
       }
-    } catch (error: any) {
-      console.error("Error fetching Solscan data:", error.message || "Unknown error");
-      // Fall back to default data if API fails
+    } catch (birdeyeError: any) {
+      console.error("Error fetching Birdeye data:", birdeyeError.message || "Unknown error");
+      
+      // Fallback to Solscan if Birdeye fails
+      try {
+        const solscanTokenData = await axios.get(
+          `https://public-api.solscan.io/token/meta?tokenAddress=${REAL_TOKEN_ADDRESS}`
+        );
+        
+        const solscanHolderData = await axios.get(
+          `https://public-api.solscan.io/token/holders?tokenAddress=${REAL_TOKEN_ADDRESS}&offset=0&limit=10`
+        );
+
+        const solscanMarketData = await axios.get(
+          `https://public-api.solscan.io/market?symbol=SOL/USD`
+        );
+
+        // Extract real data if available
+        if (solscanTokenData.data) {
+          const tokenData = solscanTokenData.data;
+          const holderCount = solscanHolderData.data?.data?.total || defaultData.price.holders;
+          const solPrice = solscanMarketData.data?.priceUsdt || 0;
+          
+          // Format and update the data
+          defaultData.name = tokenData.name || defaultData.name;
+          defaultData.symbol = tokenData.symbol || defaultData.symbol;
+          defaultData.price.holders = typeof holderCount === 'number' ? holderCount.toLocaleString() : holderCount;
+          defaultData.price.circulatingSupply = tokenData.supply 
+            ? `${(parseInt(tokenData.supply) / 1000000000).toFixed(1)}B ${defaultData.symbol}`
+            : defaultData.price.circulatingSupply;
+        }
+      } catch (solscanError: any) {
+        console.error("Error fetching Solscan data:", solscanError.message || "Unknown error");
+        
+        // Try third fallback to Jupiter API
+        try {
+          const jupiterResponse = await axios.get(
+            `https://price.jup.ag/v4/price?ids=${REAL_TOKEN_ADDRESS}`
+          );
+          
+          if (jupiterResponse.data && jupiterResponse.data.data && jupiterResponse.data.data[REAL_TOKEN_ADDRESS]) {
+            const jupiterData = jupiterResponse.data.data[REAL_TOKEN_ADDRESS];
+            const price = jupiterData.price || 0;
+            
+            // Update price only from Jupiter
+            defaultData.price.current = `$${price.toFixed(6)}`;
+          }
+        } catch (jupiterError: any) {
+          console.error("Error fetching Jupiter price data:", jupiterError.message || "Unknown error");
+          // Fall back to default data if all APIs fail
+        }
+      }
+    }
+
+    // Try to get Metaplex data for additional metadata
+    try {
+      const metaplexResponse = await axios.get(
+        `https://api.solscan.io/token/meta?token=${REAL_TOKEN_ADDRESS}`
+      );
+      
+      if (metaplexResponse.data && metaplexResponse.data.success && metaplexResponse.data.data) {
+        const metaplexData = metaplexResponse.data.data;
+        
+        // Update with additional Metaplex data if available
+        if (metaplexData.name) {
+          defaultData.name = metaplexData.name;
+        }
+        if (metaplexData.symbol) {
+          defaultData.symbol = metaplexData.symbol;
+        }
+      }
+    } catch (metaplexError: any) {
+      console.error("Error fetching Metaplex data:", metaplexError.message || "Unknown error");
+      // Continue with existing data
     }
 
     // Update cache

@@ -26,3 +26,85 @@
     transform: rotateY(180deg);
   }
 }
+
+/* Party Mode Animations and Styles */
+.party-mode {
+  animation: color-shift 10s infinite;
+}
+
+.party-bg {
+  background: linear-gradient(45deg, #ff9500, #22cfcf, #ff4e50, #5d26c1, #00b09b);
+  background-size: 400% 400%;
+  animation: gradient-shift 10s ease infinite;
+  opacity: 0.15;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes color-shift {
+  0% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(30deg); }
+  100% { filter: hue-rotate(0deg); }
+}
+
+@keyframes float-around {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(100px, -50px) rotate(90deg); }
+  50% { transform: translate(0, -100px) rotate(180deg); }
+  75% { transform: translate(-100px, -50px) rotate(270deg); }
+  100% { transform: translate(0, 0) rotate(360deg); }
+}
+
+@keyframes flash {
+  0% { opacity: 0.8; }
+  50% { opacity: 0.2; }
+  100% { opacity: 0; }
+}
+
+/* Animations for dollar signs and party elements */
+.dollar-sign {
+  animation: float-up 3s ease-out;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-100vh) rotate(20deg); opacity: 0; }
+}
+
+/* Pulsating effect for text while in party mode */
+.party-text {
+  animation: pulse-text 2s infinite;
+}
+
+@keyframes pulse-text {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); text-shadow: 0 0 10px rgba(255, 149, 0, 0.8); }
+  100% { transform: scale(1); }
+}
+
+/* Rainbow text effect */
+.rainbow-text {
+  background: linear-gradient(45deg, #ff9500, #22cfcf, #ff4e50, #5d26c1, #00b09b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 400% 400%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Glowing button animation for party mode */
+.party-button {
+  animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff9500, 0 0 20px #ff9500;
+  }
+  to {
+    box-shadow: 0 0 10px #fff, 0 0 15px #ff4e50, 0 0 20px #ff4e50, 0 0 25px #ff4e50;
+  }
+}
