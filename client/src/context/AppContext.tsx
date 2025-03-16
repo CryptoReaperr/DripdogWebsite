@@ -22,6 +22,62 @@ type TokenInfo = {
   tokenAddress: string;
 };
 
+// Admin content types
+type HeroContent = {
+  title: string;
+  subtitle: string;
+  description: string;
+  buttonText: string;
+  buttonUrl: string;
+  imageUrl?: string;
+};
+
+type Step = {
+  title: string;
+  description: string;
+  imageUrl?: string;
+};
+
+type HowToBuyContent = {
+  title: string;
+  subtitle: string;
+  steps: Step[];
+};
+
+type Social = {
+  name: string;
+  url: string;
+  icon: string;
+};
+
+type CommunityContent = {
+  title: string;
+  subtitle: string;
+  description: string;
+  socials: Social[];
+};
+
+type TeamMember = {
+  name: string;
+  role: string;
+  bio: string;
+  imageUrl?: string;
+  social?: string;
+};
+
+type TeamContent = {
+  title: string;
+  subtitle: string;
+  members: TeamMember[];
+};
+
+type AdminContent = {
+  hero: HeroContent | null;
+  howToBuy: HowToBuyContent | null;
+  community: CommunityContent | null;
+  team: TeamContent | null;
+};
+
 type AppContextType = {
   mobileMenuOpen: boolean;
   toggleMobileMenu: () => void;
@@ -42,6 +98,8 @@ type AppContextType = {
   refreshTokenData: () => void;
   partyMode: boolean;
   togglePartyMode: () => void;
+  adminContent: AdminContent;
+  refreshAdminContent: () => void;
 };
 
 const defaultPrice = {
@@ -51,6 +109,13 @@ const defaultPrice = {
   marketCap: '$4.2M',
   holders: '12,420',
   circulatingSupply: '1B $DRIP',
+};
+
+const defaultAdminContent: AdminContent = {
+  hero: null,
+  howToBuy: null,
+  community: null,
+  team: null,
 };
 
 const defaultContext: AppContextType = {
@@ -66,6 +131,8 @@ const defaultContext: AppContextType = {
   refreshTokenData: () => {},
   partyMode: false,
   togglePartyMode: () => {},
+  adminContent: defaultAdminContent,
+  refreshAdminContent: () => {},
 };
 
 const AppContext = createContext<AppContextType>(defaultContext);
@@ -81,6 +148,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [price, setPrice] = useState(defaultPrice);
   const [tokenAddress, setTokenAddress] = useState('rXKYBdFqtFuTbieQh2DBxuy6tCi8yDRY3h1kfwSpump');
   const [partyInterval, setPartyInterval] = useState<NodeJS.Timeout | null>(null);
+  const [adminContent, setAdminContent] = useState<AdminContent>(defaultAdminContent);
   
   // Function to fetch token data from our API
   const fetchTokenData = async () => {
