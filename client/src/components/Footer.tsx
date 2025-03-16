@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
   
   const socialLinks = [
     { url: 'https://t.me/NBT_portal', icon: 'fas fa-door-open', label: 'Telegram Portal' },
-    { url: 'https://twitter.com/DripDogSolana', icon: 'fab fa-twitter', label: 'Twitter' },
+    { url: 'https://x.com/DripDog_sol', icon: 'fab fa-twitter', label: 'Twitter' },
     { url: 'https://solscan.io/token/rXKYBdFqtFuTbieQh2DBxuy6tCi8yDRY3h1kfwSpump', icon: 'fas fa-search', label: 'Solscan' },
   ];
 

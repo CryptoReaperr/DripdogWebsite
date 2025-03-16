@@ -17,16 +17,8 @@ const Community: React.FC = () => {
       icon: 'fab fa-twitter',
       iconColor: 'text-[#1DA1F2]',
       bgColor: 'bg-[#1DA1F2] bg-opacity-20',
-      handle: '@DripDogSolana',
-      url: 'https://twitter.com/DripDogSolana',
-    },
-    {
-      name: 'Discord',
-      icon: 'fab fa-discord',
-      iconColor: 'text-[#5865F2]',
-      bgColor: 'bg-[#5865F2] bg-opacity-20',
-      handle: 'discord.gg/dripdog',
-      url: 'https://discord.gg/dripdog',
+      handle: '@DripDog_sol',
+      url: 'https://x.com/DripDog_sol',
     },
     {
       name: 'Reddit',
