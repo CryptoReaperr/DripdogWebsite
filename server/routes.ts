@@ -109,8 +109,10 @@ async function fetchTokenData() {
       return tokenData;
     } catch (error) {
       console.error("Error fetching Jupiter price data:", error.message);
-      // Return default data if API fails
-      const birdeyeResponse = await axios.get(
+      
+      try {
+        // Return default data if API fails
+        const birdeyeResponse = await axios.get(
         `https://public-api.birdeye.so/public/tokenlist?address=${REAL_TOKEN_ADDRESS}`,
         {
           headers: {
