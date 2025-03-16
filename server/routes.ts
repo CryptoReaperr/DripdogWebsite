@@ -59,7 +59,7 @@ let tokenDataCache: {
   expiryMs: 60000, // 1 minute cache
 };
 
-async function fetchTokenData() {
+async function fetchTokenData(): Promise<TokenData> {
   try {
     // Return cached data if still valid
     if (
@@ -70,7 +70,7 @@ async function fetchTokenData() {
     }
 
     // Default token data structure, values will be updated from APIs
-    let tokenData = {
+    let tokenData: TokenData = {
       name: 'DripDog',
       symbol: '$DRIP',
       price: {
@@ -83,7 +83,9 @@ async function fetchTokenData() {
       },
       links: {
         telegram: 'https://t.me/NBT_Portal',
-        twitter: 'https://x.com/DripDog_sol'
+        twitter: 'https://x.com/DripDog_sol',
+        discord: '',
+        reddit: ''
       },
       tokenAddress: REAL_TOKEN_ADDRESS
     };
@@ -105,12 +107,10 @@ async function fetchTokenData() {
         tokenData.price.current = `$${price.toFixed(8)}`;
         tokenData.price.marketCap = `$${(price * 1000000000).toFixed(2)}`;
       }
-
-      return tokenData;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching Jupiter price data:", error.message);
       
-      // Return default data if API fails
+      // Try Birdeye API if Jupiter fails
       try {
         const birdeyeResponse = await axios.get(
         `https://public-api.birdeye.so/public/tokenlist?address=${REAL_TOKEN_ADDRESS}`,
@@ -120,47 +120,48 @@ async function fetchTokenData() {
             'x-api-key': 'BIRDEYE_PUBLIC_API'
           }
         }
-      );
+        );
 
-      if (birdeyeResponse.data && birdeyeResponse.data.success && birdeyeResponse.data.data && birdeyeResponse.data.data.tokens) {
-        const tokenDataFromBirdeye = birdeyeResponse.data.data.tokens[0];
+        if (birdeyeResponse.data && birdeyeResponse.data.success && birdeyeResponse.data.data && birdeyeResponse.data.data.tokens) {
+          const tokenDataFromBirdeye = birdeyeResponse.data.data.tokens[0];
 
-        if (tokenDataFromBirdeye) {
-          const price = tokenDataFromBirdeye.price || 0;
-          const priceChange = tokenDataFromBirdeye.priceChange24h || 0;
-          const volume = tokenDataFromBirdeye.volume24h || 0;
+          if (tokenDataFromBirdeye) {
+            const price = tokenDataFromBirdeye.price || 0;
+            const priceChange = tokenDataFromBirdeye.priceChange24h || 0;
+            const volume = tokenDataFromBirdeye.volume24h || 0;
 
-          // Calculate holders - this might not be available from this API
-          const holders = tokenData.price.holders;
+            // Calculate holders - this might not be available from this API
+            const holders = tokenData.price.holders;
 
-          // Format values for display
-          const formatCurrency = (value: number) => {
-            if (value >= 1000000000) {
-              return `$${(value / 1000000000).toFixed(2)}B`;
-            } else if (value >= 1000000) {
-              return `$${(value / 1000000).toFixed(2)}M`;
-            } else if (value >= 1000) {
-              return `$${(value / 1000).toFixed(2)}K`;
+            // Format values for display
+            const formatCurrency = (value: number) => {
+              if (value >= 1000000000) {
+                return `$${(value / 1000000000).toFixed(2)}B`;
+              } else if (value >= 1000000) {
+                return `$${(value / 1000000).toFixed(2)}M`;
+              } else if (value >= 1000) {
+                return `$${(value / 1000).toFixed(2)}K`;
+              }
+              return `$${value.toFixed(6)}`;
+            };
+
+            // Update with real data from Birdeye
+            tokenData.name = tokenDataFromBirdeye.name || tokenData.name;
+            tokenData.symbol = tokenDataFromBirdeye.symbol || tokenData.symbol;
+            tokenData.price.current = formatCurrency(price);
+            tokenData.price.change = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
+            tokenData.price.volume = formatCurrency(volume);
+            tokenData.price.marketCap = formatCurrency(price * (tokenDataFromBirdeye.supply || 0));
+
+            // Format supply
+            let supply = tokenDataFromBirdeye.supply || 0;
+            if (supply >= 1000000000) {
+              tokenData.price.circulatingSupply = `${(supply / 1000000000).toFixed(1)}B ${tokenData.symbol}`;
+            } else if (supply >= 1000000) {
+              tokenData.price.circulatingSupply = `${(supply / 1000000).toFixed(1)}M ${tokenData.symbol}`;
+            } else {
+              tokenData.price.circulatingSupply = `${supply.toLocaleString()} ${tokenData.symbol}`;
             }
-            return `$${value.toFixed(6)}`;
-          };
-
-          // Update with real data from Birdeye
-          tokenData.name = tokenDataFromBirdeye.name || tokenData.name;
-          tokenData.symbol = tokenDataFromBirdeye.symbol || tokenData.symbol;
-          tokenData.price.current = formatCurrency(price);
-          tokenData.price.change = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
-          tokenData.price.volume = formatCurrency(volume);
-          tokenData.price.marketCap = formatCurrency(price * (tokenDataFromBirdeye.supply || 0));
-
-          // Format supply
-          let supply = tokenDataFromBirdeye.supply || 0;
-          if (supply >= 1000000000) {
-            tokenData.price.circulatingSupply = `${(supply / 1000000000).toFixed(1)}B ${tokenData.symbol}`;
-          } else if (supply >= 1000000) {
-            tokenData.price.circulatingSupply = `${(supply / 1000000).toFixed(1)}M ${tokenData.symbol}`;
-          } else {
-            tokenData.price.circulatingSupply = `${supply.toLocaleString()} ${tokenData.symbol}`;
           }
         }
       } catch (birdeyeError: any) {
@@ -216,6 +217,7 @@ async function fetchTokenData() {
           }
         }
       }
+    }
 
     // Try to get Metaplex data for additional metadata
     try {
@@ -259,7 +261,9 @@ async function fetchTokenData() {
       },
       links: {
         telegram: 'https://t.me/NBT_Portal',
-        twitter: 'https://x.com/DripDog_sol'
+        twitter: 'https://x.com/DripDog_sol',
+        discord: '',
+        reddit: ''
       },
       tokenAddress: REAL_TOKEN_ADDRESS
     };
