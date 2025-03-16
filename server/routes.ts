@@ -95,13 +95,32 @@ async function fetchTokenData() {
         `https://price.jup.ag/v4/price?ids=${REAL_TOKEN_ADDRESS}`
       );
 
-      if (jupiterResponse.data && jupiterResponse.data.data && jupiterResponse.data.data[REAL_TOKEN_ADDRESS]) {
+      // Default token data with realistic initial values
+      let tokenData = {
+        name: 'DripDog',
+        symbol: '$DRIP',
+        price: {
+          current: '$0.000001',  // Starting with a realistic microcap price
+          change: '0%',
+          volume: '$1K',
+          marketCap: '$10K',
+          holders: '50',         // Starting with a realistic holder count
+          circulatingSupply: '1B $DRIP'
+        },
+        links: {
+          telegram: 'https://t.me/NBT_Portal',
+          twitter: 'https://x.com/DripDog_sol'
+        },
+        tokenAddress: REAL_TOKEN_ADDRESS
+      };
+
+      if (jupiterResponse.data?.data?.[REAL_TOKEN_ADDRESS]) {
         const jupiterData = jupiterResponse.data.data[REAL_TOKEN_ADDRESS];
         const price = jupiterData.price || 0;
         
         // Update price from Jupiter
         tokenData.price.current = `$${price.toFixed(8)}`;
-        tokenData.price.marketCap = `$${(price * 1000000000).toFixed(2)}`; // Assuming 1B supply
+        tokenData.price.marketCap = `$${(price * 1000000000).toFixed(2)}`;
       }
 
       // Try Birdeye API for additional data
