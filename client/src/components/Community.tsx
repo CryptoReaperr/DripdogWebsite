@@ -9,8 +9,8 @@ const Community: React.FC = () => {
       icon: 'fab fa-telegram-plane',
       iconColor: 'text-[#0088cc]',
       bgColor: 'bg-[#0088cc] bg-opacity-20',
-      handle: 't.me/dripdogcoin',
-      url: 'https://t.me/dripdogcoin',
+      handle: 't.me/NBT_Portal',
+      url: 'https://t.me/NBT_Portal',
     },
     {
       name: 'Twitter',
@@ -19,14 +19,6 @@ const Community: React.FC = () => {
       bgColor: 'bg-[#1DA1F2] bg-opacity-20',
       handle: '@DripDog_sol',
       url: 'https://x.com/DripDog_sol',
-    },
-    {
-      name: 'Reddit',
-      icon: 'fab fa-reddit-alien',
-      iconColor: 'text-[#FF4500]',
-      bgColor: 'bg-[#FF4500] bg-opacity-20',
-      handle: 'r/DripDogCoin',
-      url: 'https://reddit.com/r/DripDogCoin',
     },
   ];
 
