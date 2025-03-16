@@ -442,6 +442,63 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const refreshTokenData = () => {
     fetchTokenData();
   };
+  
+  // Function to fetch admin content from API
+  const fetchAdminContent = async () => {
+    const newAdminContent = { ...defaultAdminContent };
+    
+    try {
+      // Fetch hero content
+      try {
+        const heroResponse = await axios.get('/api/admin/content/hero');
+        if (heroResponse.data && heroResponse.data.content) {
+          newAdminContent.hero = heroResponse.data.content;
+        }
+      } catch (error) {
+        console.error('Error fetching hero content:', error);
+      }
+      
+      // Fetch how to buy content
+      try {
+        const howToBuyResponse = await axios.get('/api/admin/content/howToBuy');
+        if (howToBuyResponse.data && howToBuyResponse.data.content) {
+          newAdminContent.howToBuy = howToBuyResponse.data.content;
+        }
+      } catch (error) {
+        console.error('Error fetching how to buy content:', error);
+      }
+      
+      // Fetch community content
+      try {
+        const communityResponse = await axios.get('/api/admin/content/community');
+        if (communityResponse.data && communityResponse.data.content) {
+          newAdminContent.community = communityResponse.data.content;
+        }
+      } catch (error) {
+        console.error('Error fetching community content:', error);
+      }
+      
+      // Fetch team content
+      try {
+        const teamResponse = await axios.get('/api/admin/content/team');
+        if (teamResponse.data && teamResponse.data.content) {
+          newAdminContent.team = teamResponse.data.content;
+        }
+      } catch (error) {
+        console.error('Error fetching team content:', error);
+      }
+      
+      // Update state with all fetched content
+      setAdminContent(newAdminContent);
+    } catch (error) {
+      console.error('Error fetching admin content:', error);
+    }
+  };
+  
+  // Refresh admin content
+  const refreshAdminContent = () => {
+    fetchAdminContent();
+  };
 
   // Close mobile menu on resize
   useEffect(() => {
@@ -468,6 +525,11 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   }, [mobileMenuOpen]);
 
+  // Initial fetch of admin content
+  useEffect(() => {
+    fetchAdminContent();
+  }, []);
+  
   return (
     <AppContext.Provider 
       value={{ 
@@ -482,7 +544,9 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         tokenInfo,
         refreshTokenData,
         partyMode,
-        togglePartyMode
+        togglePartyMode,
+        adminContent,
+        refreshAdminContent
       }}
     >
       {children}

@@ -10,7 +10,8 @@ const Hero: React.FC = () => {
     togglePartyMode, 
     price, 
     tokenAddress, 
-    copyToClipboard 
+    copyToClipboard,
+    adminContent 
   } = useAppContext();
   
   const [showCopied, setShowCopied] = useState(false);
@@ -193,7 +194,13 @@ const Hero: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">$DRIP</span>DOG
+          {adminContent.hero ? (
+            <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">
+              {adminContent.hero.title}
+            </span>
+          ) : (
+            <><span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">$DRIP</span>DOG</>
+          )}
         </motion.h1>
         
         <motion.p 
@@ -202,7 +209,7 @@ const Hero: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          No utility. No roadmap. Just a <span className="text-yellow-400 font-bold">fluffy boi</span> with swagger. The memest dog coin on Solana.
+          {adminContent.hero ? adminContent.hero.description : "No utility. No roadmap. Just a fluffy boi with swagger. The memest dog coin on Solana."}
         </motion.p>
         
         {/* Stats Pills */}
@@ -291,7 +298,7 @@ const Hero: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <motion.a
-            href={`https://jup.ag/swap/SOL-${tokenAddress}`}
+            href={adminContent.hero?.buttonUrl || `https://jup.ag/swap/SOL-${tokenAddress}`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-8 py-4 rounded-full text-lg font-bold hover:bg-opacity-90 shadow-[0_0_15px_rgba(250,204,21,0.4)] w-full sm:w-auto text-center"
@@ -303,7 +310,7 @@ const Hero: React.FC = () => {
             } : {}}
             transition={partyMode ? { repeat: Infinity, duration: 2 } : {}}
           >
-            <i className="fas fa-shopping-cart mr-2"></i> Buy $DRIP
+            <i className="fas fa-shopping-cart mr-2"></i> {adminContent.hero?.buttonText || "Buy $DRIP"}
           </motion.a>
           
           <motion.a
