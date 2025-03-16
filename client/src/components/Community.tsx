@@ -70,7 +70,7 @@ const Community: React.FC = () => {
         
         {/* Social Media Links */}
         <motion.div 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-16 max-w-2xl mx-auto"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
