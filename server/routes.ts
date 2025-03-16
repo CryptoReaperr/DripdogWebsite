@@ -90,13 +90,27 @@ async function fetchTokenData() {
 
     // Try multiple token data sources for resilience
     try {
-      // Try Birdeye API - better real-time data
+      // Try Jupiter API first
+      const jupiterResponse = await axios.get(
+        `https://price.jup.ag/v4/price?ids=${REAL_TOKEN_ADDRESS}`
+      );
+
+      if (jupiterResponse.data && jupiterResponse.data.data && jupiterResponse.data.data[REAL_TOKEN_ADDRESS]) {
+        const jupiterData = jupiterResponse.data.data[REAL_TOKEN_ADDRESS];
+        const price = jupiterData.price || 0;
+        
+        // Update price from Jupiter
+        tokenData.price.current = `$${price.toFixed(8)}`;
+        tokenData.price.marketCap = `$${(price * 1000000000).toFixed(2)}`; // Assuming 1B supply
+      }
+
+      // Try Birdeye API for additional data
       const birdeyeResponse = await axios.get(
         `https://public-api.birdeye.so/public/tokenlist?address=${REAL_TOKEN_ADDRESS}`,
         {
           headers: {
             'x-chain': 'solana',
-            'x-api-key': 'BIRDEYE_PUBLIC_API' // Public rate-limited key for demo purposes
+            'x-api-key': 'BIRDEYE_PUBLIC_API'
           }
         }
       );
