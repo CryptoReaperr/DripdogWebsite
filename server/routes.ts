@@ -88,23 +88,27 @@ async function fetchTokenData() {
       tokenAddress: REAL_TOKEN_ADDRESS
     };
 
-    // Try multiple token data sources for resilience
+    // Use Jupiter API for price data
     try {
-      // Try Jupiter API first
       const jupiterResponse = await axios.get(
-        `https://price.jup.ag/v4/price?ids=${REAL_TOKEN_ADDRESS}`
+        `https://price.jup.ag/v4/price?ids=${REAL_TOKEN_ADDRESS}`,
+        {
+          timeout: 5000,
+          headers: {
+            'Accept': 'application/json'
+          }
+        }
       );
 
-      // Default token data with realistic initial values
       let tokenData = {
         name: 'DripDog',
         symbol: '$DRIP',
         price: {
-          current: '$0.000001',  // Starting with a realistic microcap price
-          change: '0%',
+          current: '$0.000001',
+          change: '0%', 
           volume: '$1K',
           marketCap: '$10K',
-          holders: '50',         // Starting with a realistic holder count
+          holders: '50',
           circulatingSupply: '1B $DRIP'
         },
         links: {
@@ -114,16 +118,16 @@ async function fetchTokenData() {
         tokenAddress: REAL_TOKEN_ADDRESS
       };
 
-      if (jupiterResponse.data?.data?.[REAL_TOKEN_ADDRESS]) {
-        const jupiterData = jupiterResponse.data.data[REAL_TOKEN_ADDRESS];
-        const price = jupiterData.price || 0;
-        
-        // Update price from Jupiter
+      if (jupiterResponse?.data?.data?.[REAL_TOKEN_ADDRESS]) {
+        const price = jupiterResponse.data.data[REAL_TOKEN_ADDRESS].price || 0;
         tokenData.price.current = `$${price.toFixed(8)}`;
         tokenData.price.marketCap = `$${(price * 1000000000).toFixed(2)}`;
       }
 
-      // Try Birdeye API for additional data
+      return tokenData;
+    } catch (error) {
+      console.error("Error fetching Jupiter price data:", error.message);
+      // Return default data if API fails
       const birdeyeResponse = await axios.get(
         `https://public-api.birdeye.so/public/tokenlist?address=${REAL_TOKEN_ADDRESS}`,
         {
