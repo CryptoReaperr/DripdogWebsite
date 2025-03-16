@@ -74,11 +74,11 @@ async function fetchTokenData() {
       name: 'DripDog',
       symbol: '$DRIP',
       price: {
-        current: '$0.00421',
-        change: '+69.4%',
-        volume: '$1.2M',
-        marketCap: '$4.2M',
-        holders: '12,420',
+        current: '$0.000001',
+        change: '+0%',
+        volume: '$10K',
+        marketCap: '$100K',
+        holders: '100',
         circulatingSupply: '1B $DRIP'
       },
       links: {
