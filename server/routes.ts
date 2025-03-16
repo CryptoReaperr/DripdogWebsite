@@ -14,17 +14,17 @@ let adminSessionToken: string | null = null;
 // Authentication middleware
 const requireAdminAuth = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
-  
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Unauthorized - Missing or invalid token format' });
   }
-  
+
   const token = authHeader.split(' ')[1];
-  
+
   if (token !== adminSessionToken || !adminSessionToken) {
     return res.status(401).json({ error: 'Unauthorized - Invalid or expired token' });
   }
-  
+
   next();
 };
 
@@ -69,23 +69,21 @@ async function fetchTokenData() {
       return tokenDataCache.data;
     }
 
-    // Default token data to use if API fails
-    const defaultData = {
+    // Default token data structure, values will be updated from APIs
+    let tokenData = {
       name: 'DripDog',
       symbol: '$DRIP',
       price: {
-        current: '$0.000001',
-        change: '+0%',
-        volume: '$10K',
-        marketCap: '$100K',
-        holders: '100',
+        current: '$0.00',
+        change: '0%',
+        volume: '$0',
+        marketCap: '$0',
+        holders: '0',
         circulatingSupply: '1B $DRIP'
       },
       links: {
-        telegram: 'https://t.me/dripdogcoin',
-        twitter: 'https://twitter.com/DripDogSolana',
-        discord: 'https://discord.gg/dripdog',
-        reddit: 'https://reddit.com/r/DripDogCoin'
+        telegram: 'https://t.me/NBT_Portal',
+        twitter: 'https://x.com/DripDog_sol'
       },
       tokenAddress: REAL_TOKEN_ADDRESS
     };
@@ -102,18 +100,18 @@ async function fetchTokenData() {
           }
         }
       );
-      
+
       if (birdeyeResponse.data && birdeyeResponse.data.success && birdeyeResponse.data.data && birdeyeResponse.data.data.tokens) {
-        const tokenData = birdeyeResponse.data.data.tokens[0];
-        
-        if (tokenData) {
-          const price = tokenData.price || 0;
-          const priceChange = tokenData.priceChange24h || 0;
-          const volume = tokenData.volume24h || 0;
-          
+        const tokenDataFromBirdeye = birdeyeResponse.data.data.tokens[0];
+
+        if (tokenDataFromBirdeye) {
+          const price = tokenDataFromBirdeye.price || 0;
+          const priceChange = tokenDataFromBirdeye.priceChange24h || 0;
+          const volume = tokenDataFromBirdeye.volume24h || 0;
+
           // Calculate holders - this might not be available from this API
-          const holders = defaultData.price.holders;
-          
+          const holders = tokenData.price.holders;
+
           // Format values for display
           const formatCurrency = (value: number) => {
             if (value >= 1000000000) {
@@ -125,35 +123,35 @@ async function fetchTokenData() {
             }
             return `$${value.toFixed(6)}`;
           };
-          
+
           // Update with real data from Birdeye
-          defaultData.name = tokenData.name || defaultData.name;
-          defaultData.symbol = tokenData.symbol || defaultData.symbol;
-          defaultData.price.current = formatCurrency(price);
-          defaultData.price.change = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
-          defaultData.price.volume = formatCurrency(volume);
-          defaultData.price.marketCap = formatCurrency(price * (tokenData.supply || 0));
-          
+          tokenData.name = tokenDataFromBirdeye.name || tokenData.name;
+          tokenData.symbol = tokenDataFromBirdeye.symbol || tokenData.symbol;
+          tokenData.price.current = formatCurrency(price);
+          tokenData.price.change = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
+          tokenData.price.volume = formatCurrency(volume);
+          tokenData.price.marketCap = formatCurrency(price * (tokenDataFromBirdeye.supply || 0));
+
           // Format supply
-          let supply = tokenData.supply || 0;
+          let supply = tokenDataFromBirdeye.supply || 0;
           if (supply >= 1000000000) {
-            defaultData.price.circulatingSupply = `${(supply / 1000000000).toFixed(1)}B ${defaultData.symbol}`;
+            tokenData.price.circulatingSupply = `${(supply / 1000000000).toFixed(1)}B ${tokenData.symbol}`;
           } else if (supply >= 1000000) {
-            defaultData.price.circulatingSupply = `${(supply / 1000000).toFixed(1)}M ${defaultData.symbol}`;
+            tokenData.price.circulatingSupply = `${(supply / 1000000).toFixed(1)}M ${tokenData.symbol}`;
           } else {
-            defaultData.price.circulatingSupply = `${supply.toLocaleString()} ${defaultData.symbol}`;
+            tokenData.price.circulatingSupply = `${supply.toLocaleString()} ${tokenData.symbol}`;
           }
         }
       }
     } catch (birdeyeError: any) {
       console.error("Error fetching Birdeye data:", birdeyeError.message || "Unknown error");
-      
+
       // Fallback to Solscan if Birdeye fails
       try {
         const solscanTokenData = await axios.get(
           `https://public-api.solscan.io/token/meta?tokenAddress=${REAL_TOKEN_ADDRESS}`
         );
-        
+
         const solscanHolderData = await axios.get(
           `https://public-api.solscan.io/token/holders?tokenAddress=${REAL_TOKEN_ADDRESS}&offset=0&limit=10`
         );
@@ -164,33 +162,33 @@ async function fetchTokenData() {
 
         // Extract real data if available
         if (solscanTokenData.data) {
-          const tokenData = solscanTokenData.data;
-          const holderCount = solscanHolderData.data?.data?.total || defaultData.price.holders;
+          const tokenDataFromSolscan = solscanTokenData.data;
+          const holderCount = solscanHolderData.data?.data?.total || tokenData.price.holders;
           const solPrice = solscanMarketData.data?.priceUsdt || 0;
-          
+
           // Format and update the data
-          defaultData.name = tokenData.name || defaultData.name;
-          defaultData.symbol = tokenData.symbol || defaultData.symbol;
-          defaultData.price.holders = typeof holderCount === 'number' ? holderCount.toLocaleString() : holderCount;
-          defaultData.price.circulatingSupply = tokenData.supply 
-            ? `${(parseInt(tokenData.supply) / 1000000000).toFixed(1)}B ${defaultData.symbol}`
-            : defaultData.price.circulatingSupply;
+          tokenData.name = tokenDataFromSolscan.name || tokenData.name;
+          tokenData.symbol = tokenDataFromSolscan.symbol || tokenData.symbol;
+          tokenData.price.holders = typeof holderCount === 'number' ? holderCount.toLocaleString() : holderCount;
+          tokenData.price.circulatingSupply = tokenDataFromSolscan.supply 
+            ? `${(parseInt(tokenDataFromSolscan.supply) / 1000000000).toFixed(1)}B ${tokenData.symbol}`
+            : tokenData.price.circulatingSupply;
         }
       } catch (solscanError: any) {
         console.error("Error fetching Solscan data:", solscanError.message || "Unknown error");
-        
+
         // Try third fallback to Jupiter API
         try {
           const jupiterResponse = await axios.get(
             `https://price.jup.ag/v4/price?ids=${REAL_TOKEN_ADDRESS}`
           );
-          
+
           if (jupiterResponse.data && jupiterResponse.data.data && jupiterResponse.data.data[REAL_TOKEN_ADDRESS]) {
             const jupiterData = jupiterResponse.data.data[REAL_TOKEN_ADDRESS];
             const price = jupiterData.price || 0;
-            
+
             // Update price only from Jupiter
-            defaultData.price.current = `$${price.toFixed(6)}`;
+            tokenData.price.current = `$${price.toFixed(6)}`;
           }
         } catch (jupiterError: any) {
           console.error("Error fetching Jupiter price data:", jupiterError.message || "Unknown error");
@@ -204,16 +202,16 @@ async function fetchTokenData() {
       const metaplexResponse = await axios.get(
         `https://api.solscan.io/token/meta?token=${REAL_TOKEN_ADDRESS}`
       );
-      
+
       if (metaplexResponse.data && metaplexResponse.data.success && metaplexResponse.data.data) {
         const metaplexData = metaplexResponse.data.data;
-        
+
         // Update with additional Metaplex data if available
         if (metaplexData.name) {
-          defaultData.name = metaplexData.name;
+          tokenData.name = metaplexData.name;
         }
         if (metaplexData.symbol) {
-          defaultData.symbol = metaplexData.symbol;
+          tokenData.symbol = metaplexData.symbol;
         }
       }
     } catch (metaplexError: any) {
@@ -222,10 +220,10 @@ async function fetchTokenData() {
     }
 
     // Update cache
-    tokenDataCache.data = defaultData;
+    tokenDataCache.data = tokenData;
     tokenDataCache.timestamp = Date.now();
-    
-    return defaultData;
+
+    return tokenData;
   } catch (err) {
     console.error("Error in fetchTokenData:", err);
     return {
@@ -278,9 +276,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/telegram-bot/message', async (req, res) => {
     const { message } = req.body;
     const tokenData = await fetchTokenData();
-    
+
     let response = "I'm not sure how to respond to that. Try asking about the price, how to buy $DRIP, or request a meme!";
-    
+
     if (message.toLowerCase().includes('price')) {
       response = `Current ${tokenData.symbol} price: ${tokenData.price.current} (${tokenData.price.change})`;
     } else if (message.toLowerCase().includes('buy')) {
@@ -292,34 +290,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } else if (message.toLowerCase().includes('meme')) {
       response = `Here's a fresh DripDog meme for you! The fluffiest meme coin on Solana!`;
     }
-    
+
     res.json({ response });
   });
-  
+
   // =====================
   // ADMIN PANEL ENDPOINTS
   // =====================
-  
+
   // Admin login endpoint
   app.post('/api/admin/login', async (req, res) => {
     try {
       const { password } = req.body;
-      
+
       if (!password) {
         return res.status(400).json({ error: 'Password is required' });
       }
-      
+
       const isValid = await storage.verifyAdminPassword(password);
-      
+
       if (!isValid) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
-      
+
       // Generate a session token (simple UUID in this case, could be a JWT in production)
       adminSessionToken = Math.random().toString(36).substring(2, 15) + 
                          Math.random().toString(36).substring(2, 15) +
                          Date.now().toString(36);
-      
+
       res.json({ 
         success: true, 
         token: adminSessionToken,
@@ -330,26 +328,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-  
+
   // Admin logout endpoint
   app.post('/api/admin/logout', requireAdminAuth, (req, res) => {
     adminSessionToken = null;
     res.json({ success: true, message: 'Logged out successfully' });
   });
-  
+
   // Change admin password endpoint
   app.post('/api/admin/change-password', requireAdminAuth, async (req, res) => {
     try {
       const { newPassword } = req.body;
-      
+
       if (!newPassword || newPassword.length < 8) {
         return res.status(400).json({ 
           error: 'New password is required and must be at least 8 characters long'
         });
       }
-      
+
       await storage.setAdminPassword(newPassword);
-      
+
       res.json({ 
         success: true, 
         message: 'Password changed successfully'
@@ -359,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-  
+
   // Get all editable content sections
   app.get('/api/admin/content', requireAdminAuth, async (req, res) => {
     try {
@@ -370,37 +368,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-  
+
   // Get specific content section
   app.get('/api/admin/content/:section', async (req, res) => {
     try {
       const { section } = req.params;
       const content = await storage.getAdminContent(section);
-      
+
       if (!content) {
         return res.status(404).json({ error: 'Content section not found' });
       }
-      
+
       res.json(content);
     } catch (error: any) {
       console.error(`Get content section error for ${req.params.section}:`, error.message || error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-  
+
   // Create or update content section
   app.post('/api/admin/content/:section', requireAdminAuth, async (req, res) => {
     try {
       const { section } = req.params;
       const { content } = req.body;
-      
+
       // Validate content with Zod schema
       try {
         // Only validate the structure, not all fields are required for updates
         const contentSchema = z.object({
           content: z.any(),
         });
-        
+
         contentSchema.parse(req.body);
       } catch (validationError: any) {
         return res.status(400).json({ 
@@ -408,10 +406,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: validationError.errors 
         });
       }
-      
+
       const lastUpdated = new Date().toISOString();
       const existingContent = await storage.getAdminContent(section);
-      
+
       let result;
       if (existingContent) {
         // Update existing content
@@ -427,7 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastUpdated 
         });
       }
-      
+
       res.json({ 
         success: true, 
         message: `Content for ${section} ${existingContent ? 'updated' : 'created'} successfully`,
