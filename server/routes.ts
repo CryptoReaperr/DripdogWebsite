@@ -4,14 +4,9 @@ import { storage } from "./storage";
 import axios from "axios";
 import { z } from "zod";
 import { insertAdminContentSchema } from "@shared/schema";
-import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 // Real token address from pump.fun
 const REAL_TOKEN_ADDRESS = "rXKYBdFqtFuTbieQh2DBxuy6tCi8yDRY3h1kfwSpump";
-
-// Public Solana RPC endpoints
-const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
 
 // Session token for admin authentication
 let adminSessionToken: string | null = null;
@@ -64,7 +59,7 @@ let tokenDataCache: {
   expiryMs: 60000, // 1 minute cache
 };
 
-async function fetchTokenData(): Promise<TokenData> {
+async function fetchTokenData() {
   try {
     // Return cached data if still valid
     if (
@@ -74,116 +69,174 @@ async function fetchTokenData(): Promise<TokenData> {
       return tokenDataCache.data;
     }
 
-    // Default token data structure
-    let tokenData: TokenData = {
+    // Default token data structure, values will be updated from APIs
+    let tokenData = {
       name: 'DripDog',
       symbol: '$DRIP',
       price: {
-        current: '$0.0000042',
-        change: '+4.20%',
-        volume: '$69K',
-        marketCap: '$4.2M',
-        holders: '420',
+        current: '$0.00',
+        change: '0%',
+        volume: '$0',
+        marketCap: '$0',
+        holders: '0',
         circulatingSupply: '1B $DRIP'
       },
       links: {
         telegram: 'https://t.me/NBT_Portal',
-        twitter: 'https://x.com/DripDog_sol',
-        discord: '',
-        reddit: ''
+        twitter: 'https://x.com/DripDog_sol'
       },
       tokenAddress: REAL_TOKEN_ADDRESS
     };
 
+    // Use Jupiter API for price data
     try {
-      // Create connection to Solana network
-      const connection = new Connection(RPC_ENDPOINT);
-      
-      // Create a PublicKey from the token address
-      const tokenPubkey = new PublicKey(REAL_TOKEN_ADDRESS);
-      
-      // Get token account info
-      console.log("Fetching Solana data for token:", REAL_TOKEN_ADDRESS);
-      
-      // Get SOL price from Coingecko
-      let solPrice = 0;
-      try {
-        const solPriceResponse = await axios.get(
-          'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd',
-          { timeout: 5000 }
-        );
-        solPrice = solPriceResponse.data?.solana?.usd || 0;
-        console.log("Current SOL price:", solPrice);
-      } catch (error: any) {
-        console.error("Error fetching SOL price:", error.message);
-        solPrice = 125; // Fallback to reasonable estimate if API fails
-      }
-      
-      // Format currency helper
-      const formatCurrency = (value: number) => {
-        if (value >= 1000000000) {
-          return `$${(value / 1000000000).toFixed(2)}B`;
-        } else if (value >= 1000000) {
-          return `$${(value / 1000000).toFixed(2)}M`;
-        } else if (value >= 1000) {
-          return `$${(value / 1000).toFixed(2)}K`;
+      const jupiterResponse = await axios.get(
+        `https://price.jup.ag/v4/price?ids=${REAL_TOKEN_ADDRESS}`,
+        {
+          timeout: 5000,
+          headers: {
+            'Accept': 'application/json'
+          }
         }
-        return `$${value.toFixed(6)}`;
-      };
-      
-      // Get token supply and metadata
-      try {
-        // Use the Solana Web3.js API to get token supply information
-        const tokenInfo = await connection.getTokenSupply(tokenPubkey);
-        const supply = Number(tokenInfo.value.amount) / Math.pow(10, tokenInfo.value.decimals);
-        
-        // Estimate price based on supply and market cap
-        // Using a plausible market cap for a meme coin
-        const estimatedMarketCap = 4200000; // $4.2M - a reasonable value for the demo
-        const estimatedPrice = estimatedMarketCap / supply;
-        
-        // Format data for display
-        tokenData.price.current = `$${estimatedPrice.toFixed(8)}`;
-        tokenData.price.marketCap = formatCurrency(estimatedMarketCap);
-        tokenData.price.circulatingSupply = `${(supply / 1000000).toFixed(2)}M ${tokenData.symbol}`;
-        
-        console.log("Got token supply:", supply);
-      } catch (error: any) {
-        console.error("Error fetching token supply:", error.message);
-        // Continue with default values if this fails
+      );
+
+      if (jupiterResponse?.data?.data?.[REAL_TOKEN_ADDRESS]) {
+        const price = jupiterResponse.data.data[REAL_TOKEN_ADDRESS].price || 0;
+        tokenData.price.current = `$${price.toFixed(8)}`;
+        tokenData.price.marketCap = `$${(price * 1000000000).toFixed(2)}`;
       }
+
+      return tokenData;
+    } catch (error) {
+      console.error("Error fetching Jupiter price data:", error.message);
       
-      // Try to get large token accounts to estimate holder count
+      // Return default data if API fails
       try {
-        const largeAccounts = await connection.getTokenLargestAccounts(tokenPubkey);
-        if (largeAccounts && largeAccounts.value) {
-          // Use number of large accounts as estimate for holder count
-          // This isn't 100% accurate but provides a reasonable approximation
-          const holderEstimate = largeAccounts.value.length * 42; // Scale up by arbitrary factor
-          tokenData.price.holders = holderEstimate.toString();
-          console.log("Estimated holders:", holderEstimate);
+        const birdeyeResponse = await axios.get(
+        `https://public-api.birdeye.so/public/tokenlist?address=${REAL_TOKEN_ADDRESS}`,
+        {
+          headers: {
+            'x-chain': 'solana',
+            'x-api-key': 'BIRDEYE_PUBLIC_API'
+          }
         }
-      } catch (error: any) {
-        console.error("Error fetching token accounts:", error.message);
-        // Continue with default values
+      );
+
+      if (birdeyeResponse.data && birdeyeResponse.data.success && birdeyeResponse.data.data && birdeyeResponse.data.data.tokens) {
+        const tokenDataFromBirdeye = birdeyeResponse.data.data.tokens[0];
+
+        if (tokenDataFromBirdeye) {
+          const price = tokenDataFromBirdeye.price || 0;
+          const priceChange = tokenDataFromBirdeye.priceChange24h || 0;
+          const volume = tokenDataFromBirdeye.volume24h || 0;
+
+          // Calculate holders - this might not be available from this API
+          const holders = tokenData.price.holders;
+
+          // Format values for display
+          const formatCurrency = (value: number) => {
+            if (value >= 1000000000) {
+              return `$${(value / 1000000000).toFixed(2)}B`;
+            } else if (value >= 1000000) {
+              return `$${(value / 1000000).toFixed(2)}M`;
+            } else if (value >= 1000) {
+              return `$${(value / 1000).toFixed(2)}K`;
+            }
+            return `$${value.toFixed(6)}`;
+          };
+
+          // Update with real data from Birdeye
+          tokenData.name = tokenDataFromBirdeye.name || tokenData.name;
+          tokenData.symbol = tokenDataFromBirdeye.symbol || tokenData.symbol;
+          tokenData.price.current = formatCurrency(price);
+          tokenData.price.change = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
+          tokenData.price.volume = formatCurrency(volume);
+          tokenData.price.marketCap = formatCurrency(price * (tokenDataFromBirdeye.supply || 0));
+
+          // Format supply
+          let supply = tokenDataFromBirdeye.supply || 0;
+          if (supply >= 1000000000) {
+            tokenData.price.circulatingSupply = `${(supply / 1000000000).toFixed(1)}B ${tokenData.symbol}`;
+          } else if (supply >= 1000000) {
+            tokenData.price.circulatingSupply = `${(supply / 1000000).toFixed(1)}M ${tokenData.symbol}`;
+          } else {
+            tokenData.price.circulatingSupply = `${supply.toLocaleString()} ${tokenData.symbol}`;
+          }
+        }
+      } catch (birdeyeError: any) {
+        console.error("Error fetching Birdeye data:", birdeyeError.message || "Unknown error");
+
+        // Fallback to Solscan if Birdeye fails
+        try {
+          const solscanTokenData = await axios.get(
+            `https://public-api.solscan.io/token/meta?tokenAddress=${REAL_TOKEN_ADDRESS}`
+          );
+
+          const solscanHolderData = await axios.get(
+            `https://public-api.solscan.io/token/holders?tokenAddress=${REAL_TOKEN_ADDRESS}&offset=0&limit=10`
+          );
+
+          const solscanMarketData = await axios.get(
+            `https://public-api.solscan.io/market?symbol=SOL/USD`
+          );
+
+          // Extract real data if available
+          if (solscanTokenData.data) {
+            const tokenDataFromSolscan = solscanTokenData.data;
+            const holderCount = solscanHolderData.data?.data?.total || tokenData.price.holders;
+            const solPrice = solscanMarketData.data?.priceUsdt || 0;
+
+            // Format and update the data
+            tokenData.name = tokenDataFromSolscan.name || tokenData.name;
+            tokenData.symbol = tokenDataFromSolscan.symbol || tokenData.symbol;
+            tokenData.price.holders = typeof holderCount === 'number' ? holderCount.toLocaleString() : holderCount;
+            tokenData.price.circulatingSupply = tokenDataFromSolscan.supply 
+              ? `${(parseInt(tokenDataFromSolscan.supply) / 1000000000).toFixed(1)}B ${tokenData.symbol}`
+              : tokenData.price.circulatingSupply;
+          }
+        } catch (solscanError: any) {
+          console.error("Error fetching Solscan data:", solscanError.message || "Unknown error");
+
+          // Try third fallback to Jupiter API
+          try {
+            const jupiterResponse = await axios.get(
+              `https://price.jup.ag/v4/price?ids=${REAL_TOKEN_ADDRESS}`
+            );
+
+            if (jupiterResponse.data && jupiterResponse.data.data && jupiterResponse.data.data[REAL_TOKEN_ADDRESS]) {
+              const jupiterData = jupiterResponse.data.data[REAL_TOKEN_ADDRESS];
+              const price = jupiterData.price || 0;
+
+              // Update price only from Jupiter
+              tokenData.price.current = `$${price.toFixed(6)}`;
+            }
+          } catch (jupiterError: any) {
+            console.error("Error fetching Jupiter price data:", jupiterError.message || "Unknown error");
+            // Fall back to default data if all APIs fail
+          }
+        }
       }
-      
-      // For the demo, let's set some sensible, changing values
-      // (simulating a volatile meme coin market)
-      const now = new Date();
-      const minute = now.getMinutes();
-      
-      // Change follows a sine wave pattern to show up and down movements
-      const changeValue = Math.sin(minute / 10) * 20; 
-      tokenData.price.change = `${changeValue >= 0 ? '+' : ''}${changeValue.toFixed(2)}%`;
-      
-      // Volume changes throughout the day
-      const volumeBase = 69000 + (minute * 1000);
-      tokenData.price.volume = formatCurrency(volumeBase);
-      
-    } catch (error: any) {
-      console.error("Error in Solana data fetch:", error.message);
-      // Continue with default values if we hit issues
+
+    // Try to get Metaplex data for additional metadata
+    try {
+      const metaplexResponse = await axios.get(
+        `https://api.solscan.io/token/meta?token=${REAL_TOKEN_ADDRESS}`
+      );
+
+      if (metaplexResponse.data && metaplexResponse.data.success && metaplexResponse.data.data) {
+        const metaplexData = metaplexResponse.data.data;
+
+        // Update with additional Metaplex data if available
+        if (metaplexData.name) {
+          tokenData.name = metaplexData.name;
+        }
+        if (metaplexData.symbol) {
+          tokenData.symbol = metaplexData.symbol;
+        }
+      }
+    } catch (metaplexError: any) {
+      console.error("Error fetching Metaplex data:", metaplexError.message || "Unknown error");
+      // Continue with existing data
     }
 
     // Update cache
@@ -197,18 +250,16 @@ async function fetchTokenData(): Promise<TokenData> {
       name: 'DripDog',
       symbol: '$DRIP',
       price: {
-        current: '$0.0000042',
-        change: '+4.20%',
-        volume: '$69K',
-        marketCap: '$4.2M',
-        holders: '420',
+        current: '$0.000001',
+        change: '0%',
+        volume: '$10K',
+        marketCap: '$100K',
+        holders: '100',
         circulatingSupply: '1B $DRIP'
       },
       links: {
         telegram: 'https://t.me/NBT_Portal',
-        twitter: 'https://x.com/DripDog_sol',
-        discord: '',
-        reddit: ''
+        twitter: 'https://x.com/DripDog_sol'
       },
       tokenAddress: REAL_TOKEN_ADDRESS
     };
@@ -230,54 +281,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint to get PumpFun token info directly
   app.get('/api/pumpfun-info', async (_req, res) => {
     try {
-      // Create connection to Solana network
-      const connection = new Connection(RPC_ENDPOINT);
-      
-      // Create a PublicKey from the token address
-      const tokenPubkey = new PublicKey(REAL_TOKEN_ADDRESS);
-      
-      // Get token account info and supply
-      console.log("Fetching Solana token data for API endpoint");
-      
-      try {
-        const tokenInfo = await connection.getTokenSupply(tokenPubkey);
-        const tokenAccounts = await connection.getTokenLargestAccounts(tokenPubkey);
-        
-        // Format data for response
-        const responseData = {
-          success: true,
-          token: {
-            address: REAL_TOKEN_ADDRESS,
-            name: "DripDog",
-            symbol: "$DRIP",
-            decimals: tokenInfo.value.decimals,
-            supply: tokenInfo.value.amount,
-            largeHolders: tokenAccounts.value.length,
-            icon: "https://pump.fun/icons/dripdog.png"
-          }
-        };
-        
-        res.json(responseData);
-      } catch (error: any) {
-        console.error("Error fetching token data from Solana:", error.message);
-        
-        // Return fallback data if the token information cannot be fetched
-        res.json({
-          success: true,
-          token: {
-            address: REAL_TOKEN_ADDRESS,
-            name: "DripDog",
-            symbol: "$DRIP",
-            decimals: 9,
-            supply: "1000000000000000000",
-            largeHolders: 420,
-            icon: "https://pump.fun/icons/dripdog.png"
-          }
-        });
-      }
+      // Forward request to Solscan API
+      const solscanResponse = await axios.get(
+        `https://public-api.solscan.io/token/meta?tokenAddress=${REAL_TOKEN_ADDRESS}`
+      );
+      res.json(solscanResponse.data);
     } catch (error: any) {
-      console.error("Error in pumpfun-info endpoint:", error.message || error);
-      res.status(500).json({ error: "Failed to fetch token data" });
+      console.error("Error fetching from Solscan:", error.message || error);
+      res.status(500).json({ error: "Failed to fetch Solscan data" });
     }
   });
 
